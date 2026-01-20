@@ -90,9 +90,11 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'update',
+                    type: 'customers',
                     id: customer.id,
                     status: status,
-                    remarks: remarks
+                    remarks: remarks,
+                    documents: JSON.stringify(customer.documents || {})
                 })
             });
 

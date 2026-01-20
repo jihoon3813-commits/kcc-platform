@@ -48,10 +48,14 @@ export default function CustomerList() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
+    const [isGuest, setIsGuest] = useState(false);
+
     useEffect(() => {
         const stored = localStorage.getItem('kcc_partner');
         if (stored) {
-            setPartnerName(JSON.parse(stored).name);
+            const partner = JSON.parse(stored);
+            setPartnerName(partner.name);
+            setIsGuest(partner.id === 'guest_demo');
         }
     }, []);
 
@@ -426,6 +430,7 @@ export default function CustomerList() {
             {selectedCustomer && (
                 <CustomerDetailModal
                     customer={selectedCustomer}
+                    isGuest={isGuest}
                     onClose={() => setSelectedCustomer(null)}
                     onUpdate={(updated) => {
                         setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
@@ -437,7 +442,7 @@ export default function CustomerList() {
     );
 }
 
-function CustomerDetailModal({ customer, onClose, onUpdate }: { customer: Customer, onClose: () => void, onUpdate: (c: Customer) => void }) {
+function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { customer: Customer, isGuest: boolean, onClose: () => void, onUpdate: (c: Customer) => void }) {
     const [status, setStatus] = useState<Status>(customer.status);
     const [remarks, setRemarks] = useState(customer.remarks);
     const [documents, setDocuments] = useState<Record<string, AuditDocument>>(customer.documents || {});
@@ -497,11 +502,46 @@ function CustomerDetailModal({ customer, onClose, onUpdate }: { customer: Custom
             if (status === '1차승인(추가 서류 등록 必)' || status === '신용동의 완료') {
                 const required = ['신분증사본', '통장사본(자동이체)', '부동산 등기부 등본(원본)', '최종 견적서'];
                 if (required.every(r => updatedDocs[r])) {
-                    setStatus('1차서류 등록완료');
+                    const nextStatus = '1차서류 등록완료';
+                    setStatus(nextStatus);
+
+                    // Auto-save when status changes of mandatory docs are completed
+                    await fetch('/api/proxy', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'update',
+                            type: isGuest ? 'guest_customers' : 'customers',
+                            id: customer.id,
+                            status: nextStatus,
+                            remarks: remarks,
+                            documents: JSON.stringify(updatedDocs)
+                        })
+                    });
+                    onUpdate({ ...customer, status: nextStatus, remarks, documents: updatedDocs });
+                    alert('필수 서류가 모두 등록되어 "1차서류 등록완료"로 자동 변경되었습니다.');
+                    onClose();
+                    return;
                 }
             } else if (status === '최종승인(시공계약서 등록 必)') {
                 if (updatedDocs['시공 계약서']) {
-                    setStatus('최종서류 등록완료');
+                    const nextStatus = '최종서류 등록완료';
+                    setStatus(nextStatus);
+
+                    await fetch('/api/proxy', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'update',
+                            type: isGuest ? 'guest_customers' : 'customers',
+                            id: customer.id,
+                            status: nextStatus,
+                            remarks: remarks,
+                            documents: JSON.stringify(updatedDocs)
+                        })
+                    });
+                    onUpdate({ ...customer, status: nextStatus, remarks, documents: updatedDocs });
+                    alert('시공 계약서가 등록되어 "최종서류 등록완료"로 자동 변경되었습니다.');
+                    onClose();
+                    return;
                 }
             }
         } catch (err: any) {
@@ -525,6 +565,7 @@ function CustomerDetailModal({ customer, onClose, onUpdate }: { customer: Custom
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'update',
+                    type: isGuest ? 'guest_customers' : 'customers',
                     id: customer.id,
                     status: status,
                     remarks: remarks,
@@ -535,6 +576,7 @@ function CustomerDetailModal({ customer, onClose, onUpdate }: { customer: Custom
             if (response.ok) {
                 onUpdate({ ...customer, status, remarks, documents });
                 alert('변경사항이 저장되었습니다.');
+                onClose();
             } else {
                 throw new Error('Save failed');
             }
