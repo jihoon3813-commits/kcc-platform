@@ -53,13 +53,14 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                         boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)',
                         border: '1px solid rgba(0,0,0,0.03)',
                         display: 'flex',
-                        flexDirection: 'column'
+                        flexDirection: 'column',
+                        order: 2
                     }}>
                         <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2.5rem', color: '#111827' }}>상세 조건 설정</h3>
 
-                        <div className="amount-section" style={{ marginBottom: '2rem', flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#374151', marginBottom: '0.5rem' }}>총 공사 금액</label>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                        <div className="amount-section" style={{ marginBottom: '2rem', flex: 1, textAlign: 'center' }}>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#374151', marginBottom: '0.5rem', textAlign: 'left' }}>총 공사 금액</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', justifyContent: 'center' }}>
                                 <input
                                     type="text"
                                     value={amount.toLocaleString()}
@@ -129,7 +130,7 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                         </div>
                     </div>
 
-                    <div style={{ position: 'relative', display: 'flex' }}>
+                    <div className="calculator-result-wrapper" style={{ position: 'relative', display: 'flex', order: 1 }}>
                         <div className="calculator-result-card" style={{
                             background: 'var(--primary)',
                             color: 'white',

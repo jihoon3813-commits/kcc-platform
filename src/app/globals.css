@@ -468,3 +468,32 @@ section {
     border-radius: 0.75rem !important;
   }
 }
+
+/* Calculator Grid Mobile Order Swap */
+.calculator-grid {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.calculator-input-card {
+  order: 2 !important;
+}
+
+.calculator-result-wrapper {
+  order: 1 !important;
+}
+
+@media (min-width: 768px) {
+  .calculator-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .calculator-input-card {
+    order: 1 !important;
+  }
+
+  .calculator-result-wrapper {
+    order: 2 !important;
+  }
+}
