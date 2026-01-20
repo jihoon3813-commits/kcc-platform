@@ -466,8 +466,12 @@ function CustomerDetailModal({ customer, onClose, onUpdate }: { customer: Custom
                 })
             });
 
-            if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) throw new Error('Proxy server error');
             const result = await response.json();
+
+            if (result.result === 'error') {
+                throw new Error(result.message || 'GAS upload failed');
+            }
 
             const newDoc: AuditDocument = {
                 name: fileName,
@@ -489,9 +493,9 @@ function CustomerDetailModal({ customer, onClose, onUpdate }: { customer: Custom
                     setStatus('최종서류 등록완료');
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert('파일 업로드에 실패했습니다.');
+            alert(`파일 업로드 실패: ${err.message}`);
         } finally {
             setUploading(null);
         }
