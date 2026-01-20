@@ -150,11 +150,14 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
                             <div>
                                 <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.75rem', borderBottom: '1px solid #1e293b', paddingBottom: '0.5rem' }}>1차 심사 서류</p>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    {firstRoundDocs.map(doc => {
+                                    {firstRoundDocs.map((doc, idx) => {
                                         const file = customer.documents?.[doc];
+                                        const isRequired = [0, 1, 2, 5].includes(idx);
                                         return (
                                             <div key={doc} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: file ? 'rgba(16, 185, 129, 0.05)' : '#1e293b', borderRadius: '0.5rem', border: '1px solid', borderColor: file ? 'rgba(16, 185, 129, 0.2)' : '#334155' }}>
-                                                <span style={{ fontSize: '0.75rem', color: file ? '#10b981' : '#94a3b8' }}>{doc}</span>
+                                                <span style={{ fontSize: '0.75rem', color: file ? '#10b981' : '#94a3b8' }}>
+                                                    {doc} {isRequired ? <span style={{ color: '#ef4444', fontSize: '0.65rem' }}>(필수)</span> : <span style={{ color: '#64748b', fontSize: '0.65rem' }}>(선택)</span>}
+                                                </span>
                                                 {file?.url ? (
                                                     <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, textDecoration: 'none' }}>파일보기</a>
                                                 ) : (

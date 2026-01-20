@@ -494,8 +494,8 @@ function CustomerDetailModal({ customer, onClose, onUpdate }: { customer: Custom
             setDocuments(updatedDocs);
 
             // Auto transition logic
-            if (status === '1차승인(추가 서류 등록 必)') {
-                const required = ['신분증사본', '통장사본(자동이체)', '최종 견적서'];
+            if (status === '1차승인(추가 서류 등록 必)' || status === '신용동의 완료') {
+                const required = ['신분증사본', '통장사본(자동이체)', '부동산 등기부 등본(원본)', '최종 견적서'];
                 if (required.every(r => updatedDocs[r])) {
                     setStatus('1차서류 등록완료');
                 }
@@ -626,37 +626,42 @@ function CustomerDetailModal({ customer, onClose, onUpdate }: { customer: Custom
                         <div style={{ marginBottom: '1.5rem' }}>
                             <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem', paddingBottom: '0.4rem', borderBottom: '2px solid #3B82F6' }}>1차 심사 서류 (신용 통과 후)</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                {firstRoundDocs.map(doc => (
-                                    <div key={doc} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', background: '#F9FAFB', borderRadius: '0.5rem', border: '1px solid #f1f5f9' }}>
-                                        <span style={{ fontSize: '0.8rem', color: '#334155' }}>{doc}</span>
-                                        {documents[doc] ? (
-                                            <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                                                <span style={{ fontSize: '0.7rem', color: '#10B981', fontWeight: 700 }}>✅ 완료</span>
-                                                {documents[doc].url && (
-                                                    <a href={documents[doc].url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', color: '#3B82F6', textDecoration: 'none', fontWeight: 600 }}>보기</a>
-                                                )}
-                                                <button onClick={() => handleDeleteDoc(doc)} style={{ fontSize: '0.7rem', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem' }}>삭제</button>
-                                            </div>
-                                        ) : (
-                                            <div style={{ position: 'relative' }}>
-                                                <button
-                                                    style={{ fontSize: '0.7rem', padding: '0.25rem 0.5rem', border: '1px solid #D1D5DB', borderRadius: '0.375rem', background: 'white' }}
-                                                    disabled={!!uploading}
-                                                >
-                                                    {uploading === doc ? '업로드 중...' : '첨부'}
-                                                </button>
-                                                <input
-                                                    type="file"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (file) handleFileUpload(doc, file);
-                                                    }}
-                                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                {firstRoundDocs.map((doc, idx) => {
+                                    const isRequired = [0, 1, 2, 5].includes(idx);
+                                    return (
+                                        <div key={doc} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', background: '#F9FAFB', borderRadius: '0.5rem', border: '1px solid #f1f5f9' }}>
+                                            <span style={{ fontSize: '0.8rem', color: '#334155' }}>
+                                                {doc} {isRequired ? <span style={{ color: '#EF4444', fontSize: '0.7rem', fontWeight: 600 }}>(필수)</span> : <span style={{ color: '#94A3B8', fontSize: '0.7rem' }}>(선택)</span>}
+                                            </span>
+                                            {documents[doc] ? (
+                                                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.7rem', color: '#10B981', fontWeight: 700 }}>✅ 완료</span>
+                                                    {documents[doc].url && (
+                                                        <a href={documents[doc].url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', color: '#3B82F6', textDecoration: 'none', fontWeight: 600 }}>보기</a>
+                                                    )}
+                                                    <button onClick={() => handleDeleteDoc(doc)} style={{ fontSize: '0.7rem', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem' }}>삭제</button>
+                                                </div>
+                                            ) : (
+                                                <div style={{ position: 'relative' }}>
+                                                    <button
+                                                        style={{ fontSize: '0.7rem', padding: '0.25rem 0.5rem', border: '1px solid #D1D5DB', borderRadius: '0.375rem', background: 'white' }}
+                                                        disabled={!!uploading}
+                                                    >
+                                                        {uploading === doc ? '업로드 중...' : '첨부'}
+                                                    </button>
+                                                    <input
+                                                        type="file"
+                                                        onChange={(e) => {
+                                                            const file = e.target.files?.[0];
+                                                            if (file) handleFileUpload(doc, file);
+                                                        }}
+                                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
