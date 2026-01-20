@@ -399,12 +399,7 @@ export default function Home() {
                 구독 솔루션의 대중화를 선도합니다.
               </p>
             </div>
-            <div>
-              <h4 style={{ color: 'white', marginBottom: '1.5rem', fontSize: '1.1rem', fontWeight: 700 }}>고객센터</h4>
-              <p style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', marginBottom: '0.5rem' }}>1588-0883</p>
-              <p style={{ fontSize: '0.9rem' }}>평일 09:00 - 18:00</p>
-              <p style={{ fontSize: '0.9rem' }}>개인정보 관리자: 김은경 (kek3171@nate.com)</p>
-            </div>
+
             <div>
               <h4 style={{ color: 'white', marginBottom: '1.5rem', fontSize: '1.1rem', fontWeight: 700 }}>빠른 링크</h4>
               <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
@@ -428,8 +423,7 @@ export default function Home() {
                 >
                   🚀 관리자 페이지 체험 (Guest)
                 </a>
-                <a href="#" style={{ transition: 'color 0.2s' }}>이용약관</a>
-                <a href="#" style={{ transition: 'color 0.2s', color: '#cbd5e1' }}>개인정보처리방침</a>
+
               </nav>
             </div>
           </div>
@@ -449,8 +443,7 @@ export default function Home() {
               주소: 서울시 금천구 가산디지털1로 83, 802호
             </div>
             <div>
-              © 2025 주식회사 티유디지털. All Rights Reserved. <br />
-              KCC 홈씨씨는 KCC글라스의 등록상표입니다.
+              © 2025 주식회사 티유디지털. All Rights Reserved.
             </div>
           </div>
         </div>
