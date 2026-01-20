@@ -37,8 +37,8 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
             <div className="container">
                 <div className="calculator-header" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                     <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem', marginBottom: '0.75rem', letterSpacing: '0.1em' }}>SIMULATOR</div>
-                    <h2 className="calculator-title" style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.75rem', color: '#111827' }}>실시간 구독료 시뮬레이터</h2>
-                    <p className="calculator-subtitle" style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.5 }}>원하는 공사 금액과 기간을 설정하여<br className="mobile-br" /> 월 납입금을 확인해 보세요.</p>
+                    <h2 className="calculator-title" style={{ fontSize: 'clamp(1.5rem, 5vw, 1.75rem)', fontWeight: 800, marginBottom: '0.75rem', color: '#111827', wordBreak: 'keep-all' }}>실시간 구독료 시뮬레이터</h2>
+                    <p className="calculator-subtitle" style={{ color: '#6b7280', fontSize: '0.9rem', lineHeight: 1.5, wordBreak: 'keep-all' }}>원하는 공사 금액과 기간을 설정하여 월 납입금을 확인해 보세요.</p>
                 </div>
 
                 <div className="calculator-grid" style={{
@@ -104,22 +104,23 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
 
                         <div style={{ marginTop: 'auto' }}>
                             <label style={{ display: 'block', marginBottom: '1.25rem', fontSize: '1rem', fontWeight: 700, color: '#374151' }}>나누어 낼 기간 (구독 개월수)</label>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                            <div className="months-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem' }}>
                                 {[12, 24, 36, 48, 60].map((m) => (
                                     <button
                                         key={m}
                                         onClick={() => setMonths(m)}
                                         style={{
-                                            padding: '1rem',
-                                            borderRadius: '1rem',
+                                            padding: '0.75rem 0.25rem',
+                                            borderRadius: '0.75rem',
                                             border: '2px solid',
                                             borderColor: months === m ? 'var(--primary)' : '#f3f4f6',
                                             background: months === m ? 'rgba(0, 70, 173, 0.05)' : '#f3f4f6',
                                             color: months === m ? 'var(--primary)' : '#6b7280',
                                             fontWeight: 700,
-                                            fontSize: '1rem',
+                                            fontSize: '0.85rem',
                                             transition: 'all 0.2s',
-                                            cursor: 'pointer'
+                                            cursor: 'pointer',
+                                            whiteSpace: 'nowrap'
                                         }}
                                     >
                                         {m}개월
@@ -164,11 +165,11 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                                 </h2>
                                 <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)', margin: '1.5rem 0' }} />
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', fontSize: '0.95rem' }}>
-                                        <span style={{ fontSize: '1.25rem' }}>☕</span> 월 커피 한잔 값으로 고객님 창호 교체
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                                        <span style={{ fontSize: '1.1rem' }}>☕</span> 월 커피 한잔 값으로 고객님 창호 교체
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', fontSize: '0.95rem' }}>
-                                        <span style={{ fontSize: '1.25rem' }}>✅</span> KCC홈씨씨 공식 인증 구독 프로그램
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                                        <span style={{ fontSize: '1.1rem' }}>✅</span> KCC홈씨씨 공식 인증 구독 프로그램
                                     </div>
                                 </div>
                                 <button

@@ -52,15 +52,16 @@ export default function Home() {
                 <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.8rem' }}>📊 실제 운영 데이터</span>
               </div>
               <h2 style={{
-                fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
+                fontSize: 'clamp(1.4rem, 5vw, 2.25rem)',
                 fontWeight: 800,
                 marginBottom: '0.75rem',
-                lineHeight: 1.3
+                lineHeight: 1.3,
+                wordBreak: 'keep-all'
               }}>
-                구독을 도입하면<br className="mobile-br" /> <span style={{ color: '#fbbf24' }}>정말 계약률이 높아질까요?</span>
+                구독을 도입하면 <span style={{ color: '#fbbf24' }}>정말 계약률이 높아질까요?</span>
               </h2>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                네! 티유디지털이 3개월간<br className="mobile-br" /> 직접 검증한 결과입니다.
+              <p style={{ color: '#94a3b8', fontSize: '0.85rem', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                네! 티유디지털이 3개월간 직접 검증한 결과입니다.
               </p>
             </div>
 
@@ -121,12 +122,13 @@ export default function Home() {
             {/* Confirmation Message */}
             <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
               <p style={{
-                fontSize: '0.95rem',
+                fontSize: '0.9rem',
                 fontWeight: 700,
                 color: '#fbbf24',
-                lineHeight: 1.4
+                lineHeight: 1.4,
+                wordBreak: 'keep-all'
               }}>
-                ✨ 파트너 사장님의 사업 활성화에<br className="mobile-br" /> 분명한 도구가 됩니다!
+                ✨ 파트너 사장님의 사업 활성화에 분명한 도구가 됩니다!
               </p>
             </div>
           </div>
@@ -346,13 +348,14 @@ export default function Home() {
 
           <div className="container" style={{ position: 'relative', zIndex: 1 }}>
             <h2 className="cta-title" style={{
-              fontSize: '1.5rem',
+              fontSize: 'clamp(1.3rem, 5vw, 1.75rem)',
               fontWeight: 800,
               color: 'white',
               marginBottom: '1rem',
               letterSpacing: '-0.02em',
-              lineHeight: 1.35
-            }}>지금 바로 KCC 홈씨씨 구독 솔루션<br className="mobile-br" /> 파트너가 되세요!</h2>
+              lineHeight: 1.35,
+              wordBreak: 'keep-all'
+            }}>지금 바로 KCC 홈씨씨 구독 솔루션 파트너가 되세요!</h2>
             <p style={{
               fontSize: '0.9rem',
               color: '#94a3b8',
