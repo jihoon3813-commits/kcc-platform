@@ -566,7 +566,7 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
 
             if (finalStatus === '1차서류 등록완료') {
                 if (!required1.every(r => documents[r])) {
-                    finalStatus = '신용동의 완료';
+                    finalStatus = '1차승인(추가 서류 등록 必)';
                 }
             } else if (finalStatus === '1차승인(추가 서류 등록 必)' || finalStatus === '신용동의 완료') {
                 if (required1.every(r => documents[r])) {
