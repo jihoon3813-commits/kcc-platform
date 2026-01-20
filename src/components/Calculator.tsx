@@ -57,29 +57,28 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                     }}>
                         <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2.5rem', color: '#111827' }}>상세 조건 설정</h3>
 
-                        <div style={{ marginBottom: '3rem', flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
-                                <label style={{ fontSize: '1rem', fontWeight: 700, color: '#374151' }}>총 공사 금액</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <input
-                                        type="text"
-                                        value={amount.toLocaleString()}
-                                        onChange={handleAmountInputChange}
-                                        style={{
-                                            fontSize: '1.75rem',
-                                            fontWeight: 800,
-                                            color: 'var(--primary)',
-                                            border: 'none',
-                                            borderBottom: '2px solid #e5e7eb',
-                                            padding: '0.2rem 0',
-                                            width: '200px',
-                                            textAlign: 'right',
-                                            outline: 'none',
-                                            background: 'transparent'
-                                        }}
-                                    />
-                                    <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#9ca3af' }}>원</span>
-                                </div>
+                        <div className="amount-section" style={{ marginBottom: '2rem', flex: 1 }}>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#374151', marginBottom: '0.5rem' }}>총 공사 금액</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                                <input
+                                    type="text"
+                                    value={amount.toLocaleString()}
+                                    onChange={handleAmountInputChange}
+                                    style={{
+                                        fontSize: '1.5rem',
+                                        fontWeight: 800,
+                                        color: 'var(--primary)',
+                                        border: 'none',
+                                        borderBottom: '2px solid #e5e7eb',
+                                        padding: '0.2rem 0',
+                                        width: '100%',
+                                        maxWidth: '200px',
+                                        textAlign: 'right',
+                                        outline: 'none',
+                                        background: 'transparent'
+                                    }}
+                                />
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#9ca3af' }}>원</span>
                             </div>
                             <input
                                 type="range"
@@ -134,8 +133,8 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                         <div className="calculator-result-card" style={{
                             background: 'var(--primary)',
                             color: 'white',
-                            padding: '2.5rem 1.5rem',
-                            borderRadius: '2rem',
+                            padding: '1.5rem 1rem',
+                            borderRadius: '1.5rem',
                             textAlign: 'center',
                             boxShadow: '0 25px 50px -12px rgba(0, 70, 173, 0.4)',
                             position: 'relative',
@@ -159,12 +158,12 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                             }} />
 
                             <div style={{ position: 'relative', zIndex: 1 }}>
-                                <p style={{ fontSize: '0.95rem', opacity: 0.8, marginBottom: '0.75rem' }}>예상 월 구독료</p>
-                                <h2 className="calculator-result-amount" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>
-                                    {monthlyPayment.toLocaleString()} <span style={{ fontSize: 'clamp(1rem, 3vw, 1.5rem)', opacity: 0.7 }}>원</span>
+                                <p style={{ fontSize: '0.85rem', opacity: 0.8, marginBottom: '0.5rem' }}>예상 월 구독료</p>
+                                <h2 className="calculator-result-amount" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.02em' }}>
+                                    {monthlyPayment.toLocaleString()} <span style={{ fontSize: 'clamp(0.9rem, 3vw, 1.25rem)', opacity: 0.7 }}>원</span>
                                 </h2>
-                                <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)', margin: '1.5rem 0' }} />
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+                                <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)', margin: '1rem 0' }} />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                                         <span style={{ fontSize: '1.1rem' }}>☕</span> 월 커피 한잔 값으로 고객님 창호 교체
                                     </div>
