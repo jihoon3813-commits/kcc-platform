@@ -38,7 +38,7 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                 <div className="calculator-header" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                     <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem', marginBottom: '0.75rem', letterSpacing: '0.1em' }}>SIMULATOR</div>
                     <h2 className="calculator-title" style={{ fontSize: 'clamp(1.5rem, 5vw, 1.75rem)', fontWeight: 800, marginBottom: '0.75rem', color: '#111827', wordBreak: 'keep-all' }}>실시간 구독료 시뮬레이터</h2>
-                    <p className="calculator-subtitle" style={{ color: '#6b7280', fontSize: '0.9rem', lineHeight: 1.5, wordBreak: 'keep-all' }}>원하는 공사 금액과 기간을 설정하여 월 납입금을 확인해 보세요.</p>
+                    <p className="calculator-subtitle" style={{ color: '#6b7280', fontSize: '0.9rem', lineHeight: 1.5 }}>원하는 공사 금액과 기간을 설정하여<br className="mobile-br" /> 월 납입금을 확인해 보세요.</p>
                 </div>
 
                 <div className="calculator-grid" style={{

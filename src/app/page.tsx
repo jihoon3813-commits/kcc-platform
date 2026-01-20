@@ -128,7 +128,7 @@ export default function Home() {
                 lineHeight: 1.4,
                 wordBreak: 'keep-all'
               }}>
-                ✨ 파트너 사장님의 사업 활성화에 분명한 도구가 됩니다!
+                ✨ 파트너 사장님의 사업 활성화에<br className="mobile-br" /> 분명한 도구가 됩니다!
               </p>
             </div>
           </div>
