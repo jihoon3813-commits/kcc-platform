@@ -455,21 +455,63 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
     ];
     const secondRoundDocs = ['시공 계약서'];
 
+    const compressImage = (file: File): Promise<string> => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxSide = 1920;
+
+                    if (width > height) {
+                        if (width > maxSide) {
+                            height *= maxSide / width;
+                            width = maxSide;
+                        }
+                    } else {
+                        if (height > maxSide) {
+                            width *= maxSide / height;
+                            height = maxSide;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    // Compress as JPEG with 0.75 quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                    resolve(dataUrl.split(',')[1]);
+                };
+                img.src = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
     const handleFileUpload = async (docName: string, file: File) => {
         setUploading(docName);
         try {
-            const reader = new FileReader();
-            const base64Promise = new Promise<string>((resolve) => {
-                reader.onload = () => {
-                    const base64 = (reader.result as string).split(',')[1];
-                    resolve(base64);
-                };
-            });
-            reader.readAsDataURL(file);
-            const base64 = await base64Promise;
+            let base64 = '';
+            if (file.type.startsWith('image/')) {
+                base64 = await compressImage(file);
+            } else {
+                const base64Promise = new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const b64 = (reader.result as string).split(',')[1];
+                        resolve(b64);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                base64 = await base64Promise;
+            }
 
-            // Naming convention: 신청일_신청자_연락처_서류명
-            const sanitizedPhone = customer.phone.replace(/[^0-9]/g, '');
+            const sanitizedPhone = (customer.phone || '').replace(/[^0-9]/g, '');
             const fileName = `${customer.date}_${customer.name}_${sanitizedPhone}_${docName}`;
 
             const response = await fetch('/api/proxy', {
