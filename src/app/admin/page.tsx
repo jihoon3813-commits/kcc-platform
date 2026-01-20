@@ -19,6 +19,7 @@ interface Stats {
     totalApps: number;
     pendingApproval: number;
     totalAmount: number;
+    newDocsCount: number;
 }
 
 const formatDate = (val: string) => {
@@ -40,7 +41,8 @@ export default function AdminDashboard() {
         totalPartners: 0,
         totalApps: 0,
         pendingApproval: 0,
-        totalAmount: 0
+        totalAmount: 0,
+        newDocsCount: 0
     });
     const [recentPartners, setRecentPartners] = useState<Partner[]>([]);
     const [notifications, setNotifications] = useState([
@@ -102,7 +104,14 @@ export default function AdminDashboard() {
                             status: '정상' as const
                         };
                     });
-                    setRecentPartners(mappedPartners.slice(0, 5));
+
+                    const sortedPartners = mappedPartners.sort((a, b) => {
+                        const dateA = new Date(a.joinDate).getTime();
+                        const dateB = new Date(b.joinDate).getTime();
+                        if (dateA !== dateB) return dateB - dateA;
+                        return b.id.localeCompare(a.id);
+                    });
+                    setRecentPartners(sortedPartners.slice(0, 5));
                 }
 
                 if (Array.isArray(cData)) {
@@ -115,7 +124,8 @@ export default function AdminDashboard() {
                         totalPartners: validPartners.length,
                         totalApps: validCustomers.length,
                         pendingApproval: validCustomers.filter((c: any) => c['상태'] === '접수' || c['상태'] === '1차승인(추가 서류 등록 必)').length,
-                        totalAmount: totalAmt
+                        totalAmount: totalAmt,
+                        newDocsCount: validCustomers.filter((c: any) => c['상태'] === '1차서류 등록완료' || c['상태'] === '최종서류 등록완료').length
                     });
 
                     // Calculate real-time notifications
@@ -175,16 +185,34 @@ export default function AdminDashboard() {
                         { label: '누적 신청 건수', value: `${stats.totalApps.toLocaleString()}건`, icon: '📝', color: '#818cf8' },
                         { label: '승인 대기', value: `${stats.pendingApproval}건`, icon: '⏳', color: '#fbbf24' },
                         { label: '누적 매출액', value: `${(stats.totalAmount / 100000000).toFixed(1)}억`, icon: '💎', color: '#10b981' },
+                        {
+                            label: '신규등록 서류',
+                            value: `${stats.newDocsCount}건`,
+                            icon: '📂',
+                            color: '#ef4444',
+                            link: '/admin/customers?filter=pending_docs',
+                            isSpecial: true
+                        },
                     ].map((s, i) => (
-                        <div key={i} style={{
-                            background: '#0f172a',
-                            padding: '1.5rem',
-                            borderRadius: '1.25rem',
-                            border: '1px solid #1e293b',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.5rem'
-                        }}>
+                        <div key={i}
+                            onClick={() => s.link && (window.location.href = s.link)}
+                            style={{
+                                background: '#0f172a',
+                                padding: '1.5rem',
+                                borderRadius: '1.25rem',
+                                border: '1px solid #1e293b',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.5rem',
+                                cursor: s.link ? 'pointer' : 'default',
+                                transition: 'all 0.2s',
+                                boxShadow: s.isSpecial ? '0 0 15px rgba(239, 68, 68, 0.1)' : 'none',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}
+                            className="stat-card"
+                        >
+                            {s.isSpecial && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }} />}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 600 }}>{s.label}</span>
                                 <span style={{ fontSize: '1.25rem' }}>{s.icon}</span>
@@ -291,8 +319,14 @@ export default function AdminDashboard() {
 
                 .stats-grid {
                     display: grid;
-                    grid-template-columns: repeat(4, 1fr);
+                    grid-template-columns: repeat(5, 1fr);
                     gap: 1.5rem;
+                }
+
+                .stat-card:hover {
+                    transform: translateY(-5px);
+                    border-color: #3b82f640 !important;
+                    background: #1e293b !important;
                 }
 
                 .dashboard-content-grid {

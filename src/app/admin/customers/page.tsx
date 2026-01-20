@@ -1,7 +1,8 @@
 'use client';
 
 import AdminSidebar from '@/components/AdminSidebar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 type Status =
     | '접수'
@@ -208,12 +209,22 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
 };
 
 export default function AdminCustomerList() {
+    return (
+        <Suspense fallback={<div style={{ background: '#020617', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>로딩 중...</div>}>
+            <AdminCustomerListContent />
+        </Suspense>
+    );
+}
+
+function AdminCustomerListContent() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('전체');
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const searchParams = useSearchParams();
+    const initialFilter = searchParams.get('filter');
 
     // Filter states
     const [datePreset, setDatePreset] = useState('전체');
@@ -242,7 +253,12 @@ export default function AdminCustomerList() {
                         documents: docsJson ? (typeof docsJson === 'string' ? JSON.parse(docsJson) : docsJson) : {}
                     };
                 });
-                const sorted = mappedData.reverse();
+                const sorted = mappedData.sort((a: any, b: any) => {
+                    const dateA = new Date(a.date).getTime();
+                    const dateB = new Date(b.date).getTime();
+                    if (dateA !== dateB) return dateB - dateA;
+                    return b.id.toString().localeCompare(a.id.toString());
+                });
                 setCustomers(sorted);
                 setFilteredCustomers(sorted);
             }
@@ -255,7 +271,10 @@ export default function AdminCustomerList() {
 
     useEffect(() => {
         fetchAllCustomers();
-    }, []);
+        if (initialFilter === 'pending_docs') {
+            setFilterStatus('서류검수필요');
+        }
+    }, [initialFilter]);
 
     useEffect(() => {
         const filtered = customers.filter(c => {
@@ -263,7 +282,9 @@ export default function AdminCustomerList() {
             const matchesSearch = c.name.includes(searchTerm) || c.partnerName.includes(searchTerm) || c.phone.includes(searchTerm);
 
             // 2. Status Filter
-            const matchesStatus = filterStatus === '전체' || c.status === filterStatus;
+            const isPendingDocs = c.status === '1차서류 등록완료' || c.status === '최종서류 등록완료';
+            const matchesStatus = filterStatus === '전체' ||
+                (filterStatus === '서류검수필요' ? isPendingDocs : c.status === filterStatus);
 
             // 3. Date Filter
             let matchesDate = true;
@@ -329,6 +350,7 @@ export default function AdminCustomerList() {
                             }}
                         >
                             <option value="전체">모든 상태</option>
+                            <option value="서류검수필요">📂 신규 서류 등록 (검수 필요)</option>
                             {statusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>

@@ -99,7 +99,13 @@ export default function CustomerList() {
                     };
                 });
 
-                setCustomers(mappedData.reverse() as Customer[]);
+                const sortedData = mappedData.sort((a, b) => {
+                    const dateA = new Date(a.date).getTime();
+                    const dateB = new Date(b.date).getTime();
+                    if (dateA !== dateB) return dateB - dateA;
+                    return b.id.toString().localeCompare(a.id.toString());
+                });
+                setCustomers(sortedData);
             } else {
                 setCustomers([]);
             }
