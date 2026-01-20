@@ -535,21 +535,37 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
     const handleSave = async () => {
         setSaving(true);
         try {
+            let finalStatus = status;
+            if (finalStatus === '1차승인(추가 서류 등록 必)' || finalStatus === '신용동의 완료') {
+                const required = ['신분증사본', '통장사본(자동이체)', '부동산 등기부 등본(원본)', '최종 견적서'];
+                if (required.every(r => documents[r])) {
+                    finalStatus = '1차서류 등록완료';
+                }
+            } else if (finalStatus === '최종승인(시공계약서 등록 必)') {
+                if (documents['시공 계약서']) {
+                    finalStatus = '최종서류 등록완료';
+                }
+            }
+
             const response = await fetch('/api/proxy', {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'update',
                     type: isGuest ? 'guest_customers' : 'customers',
                     id: customer.id,
-                    status: status,
+                    status: finalStatus,
                     remarks: remarks,
                     documents: JSON.stringify(documents)
                 })
             });
 
             if (response.ok) {
-                onUpdate({ ...customer, status, remarks, documents });
-                alert('변경사항이 저장되었습니다.');
+                onUpdate({ ...customer, status: finalStatus, remarks, documents });
+                if (finalStatus !== status) {
+                    alert(`필수 서류 등록이 확인되어 '${finalStatus}' 상태로 변경 저장되었습니다.`);
+                } else {
+                    alert('변경사항이 저장되었습니다.');
+                }
                 onClose();
             } else {
                 throw new Error('Save failed');
