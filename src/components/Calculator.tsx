@@ -56,9 +56,9 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                         flexDirection: 'column',
                         order: 2
                     }}>
-                        <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2.5rem', color: '#111827' }}>상세 조건 설정</h3>
+                        <h3 className="input-card-title" style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', color: '#111827' }}>상세 조건 설정</h3>
 
-                        <div className="amount-section" style={{ marginBottom: '2rem', flex: 1, textAlign: 'center' }}>
+                        <div className="amount-section" style={{ marginBottom: '1.5rem', flex: 1, textAlign: 'center', order: 2 }}>
                             <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#374151', marginBottom: '0.5rem', textAlign: 'left' }}>총 공사 금액</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', justifyContent: 'center' }}>
                                 <input
@@ -102,8 +102,8 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                             </div>
                         </div>
 
-                        <div style={{ marginTop: 'auto' }}>
-                            <label style={{ display: 'block', marginBottom: '1.25rem', fontSize: '1rem', fontWeight: 700, color: '#374151' }}>나누어 낼 기간 (구독 개월수)</label>
+                        <div className="months-section" style={{ marginTop: 'auto', order: 1 }}>
+                            <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 700, color: '#374151' }}>나누어 낼 기간 (구독 개월수)</label>
                             <div className="months-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem' }}>
                                 {[12, 24, 36, 48, 60].map((m) => (
                                     <button
@@ -163,8 +163,8 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                                 <h2 className="calculator-result-amount" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.02em' }}>
                                     {monthlyPayment.toLocaleString()} <span style={{ fontSize: 'clamp(0.9rem, 3vw, 1.25rem)', opacity: 0.7 }}>원</span>
                                 </h2>
-                                <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)', margin: '1rem 0' }} />
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                                <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.75rem 0' }} />
+                                <div className="result-features" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                                         <span style={{ fontSize: '1.1rem' }}>☕</span> 월 커피 한잔 값으로 고객님 창호 교체
                                     </div>
@@ -174,14 +174,14 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                                 </div>
                                 <button
                                     onClick={onRegisterClick}
-                                    className="btn-primary"
+                                    className="btn-primary result-cta-btn"
                                     style={{
                                         background: '#fff',
                                         color: 'var(--primary)',
                                         width: '100%',
-                                        padding: '1.5rem',
-                                        borderRadius: '3rem',
-                                        fontSize: '1.25rem',
+                                        padding: '1rem',
+                                        borderRadius: '2rem',
+                                        fontSize: '1rem',
                                         fontWeight: 800,
                                         boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
                                         justifyContent: 'center',
