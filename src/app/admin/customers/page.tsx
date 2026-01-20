@@ -228,9 +228,9 @@ export default function AdminCustomerList() {
 
             if (Array.isArray(data)) {
                 const mappedData = data.map((item: any) => {
-                    const docsJson = item['documents'] || item['서류'] || item['서류 JSON'] || item['서류JSON'];
+                    const docsJson = item['documents'] || item['서류'] || item['서류관리'] || item['서류 JSON'] || item['서류JSON'];
                     return {
-                        id: item['고객번호'] || item.ID || '-',
+                        id: item['고객번호'] || item['고객 번호'] || item.ID || item.id || '-',
                         date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
                         name: item['신청자명'] || '이름 없음',
                         phone: item['연락처'] || '-',

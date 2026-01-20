@@ -58,7 +58,12 @@ export default function CustomerList() {
     const fetchCustomers = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/proxy?type=customers');
+            const storedPartner = localStorage.getItem('kcc_partner') ? JSON.parse(localStorage.getItem('kcc_partner')!) : null;
+            const myPartnerId = storedPartner?.id;
+            const isGuest = myPartnerId === 'guest_demo';
+
+            // Fetch from dedicated test sheet if guest, otherwise production sheet
+            const response = await fetch(`/api/proxy?type=${isGuest ? 'guest_customers' : 'customers'}`);
             const data = await response.json();
 
             if (Array.isArray(data)) {
@@ -80,9 +85,9 @@ export default function CustomerList() {
                     const sanitizedAmount = rawAmount.toString().replace(/,/g, '');
                     const amount = isNaN(Number(sanitizedAmount)) ? '0' : Number(sanitizedAmount).toLocaleString();
 
-                    const docsJson = item['documents'] || item['서류'] || item['서류 JSON'] || item['서류JSON'];
+                    const docsJson = item['documents'] || item['서류'] || item['서류관리'] || item['서류 JSON'] || item['서류JSON'];
                     return {
-                        id: item['고객번호'] || item.ID || Math.random(),
+                        id: item['고객번호'] || item['고객 번호'] || item.ID || item.id || Math.random(),
                         name: item['신청자명'] || '이름 없음',
                         phone: item['연락처'] || '-',
                         address: item['주소'] || '-',

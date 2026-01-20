@@ -79,9 +79,9 @@ export default function Dashboard() {
                     const sanitizedAmount = rawAmount.toString().replace(/,/g, '');
                     const amount = isNaN(Number(sanitizedAmount)) ? '0' : Number(sanitizedAmount).toLocaleString();
 
-                    const docsJson = item['documents'] || item['서류'] || item['서류 JSON'] || item['서류JSON'];
+                    const docsJson = item['documents'] || item['서류'] || item['서류관리'] || item['서류 JSON'] || item['서류JSON'];
                     return {
-                        id: item['고객번호'] || item.ID || Math.random(),
+                        id: item['고객번호'] || item['고객 번호'] || item.ID || item.id || Math.random(),
                         name: item['신청자명'] || '이름 없음',
                         phone: item['연락처'] || '-',
                         address: item['주소'] || '-',
