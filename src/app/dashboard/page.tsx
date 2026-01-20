@@ -79,6 +79,7 @@ export default function Dashboard() {
                     const sanitizedAmount = rawAmount.toString().replace(/,/g, '');
                     const amount = isNaN(Number(sanitizedAmount)) ? '0' : Number(sanitizedAmount).toLocaleString();
 
+                    const docsJson = item['documents'] || item['서류'] || item['서류 JSON'] || item['서류JSON'];
                     return {
                         id: item['고객번호'] || item.ID || Math.random(),
                         name: item['신청자명'] || '이름 없음',
@@ -88,7 +89,7 @@ export default function Dashboard() {
                         date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
                         status: (item['상태'] || '접수') as Status,
                         remarks: item['비고'] || '',
-                        documents: item['documents'] ? (typeof item['documents'] === 'string' ? JSON.parse(item['documents']) : item['documents']) : {}
+                        documents: docsJson ? (typeof docsJson === 'string' ? JSON.parse(docsJson) : docsJson) : {}
                     };
                 });
 
@@ -395,9 +396,10 @@ export default function Dashboard() {
                 <CustomerDetailModal
                     customer={selectedCustomer}
                     onClose={() => setSelectedCustomer(null)}
-                    onUpdate={() => {
+                    onUpdate={(updated) => {
                         setSelectedCustomer(null);
-                        fetchCustomers();
+                        setAllCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+                        // fetchCustomers(); // No need to re-fetch if we update locally, but keep for robustness if needed
                     }}
                 />
             )}

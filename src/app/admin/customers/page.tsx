@@ -227,18 +227,21 @@ export default function AdminCustomerList() {
             const data = await response.json();
 
             if (Array.isArray(data)) {
-                const mappedData = data.map((item: any) => ({
-                    id: item['고객번호'] || item.ID || '-',
-                    date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
-                    name: item['신청자명'] || '이름 없음',
-                    phone: item['연락처'] || '-',
-                    address: item['주소'] || '-',
-                    amount: item['최종 견적가'] || item['견적금액'] || '0',
-                    status: (item['상태'] || '접수') as Status,
-                    partnerName: item['파트너명'] || '미지정',
-                    remarks: item['비고'] || '',
-                    documents: item['documents'] ? (typeof item['documents'] === 'string' ? JSON.parse(item['documents']) : item['documents']) : {}
-                }));
+                const mappedData = data.map((item: any) => {
+                    const docsJson = item['documents'] || item['서류'] || item['서류 JSON'] || item['서류JSON'];
+                    return {
+                        id: item['고객번호'] || item.ID || '-',
+                        date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
+                        name: item['신청자명'] || '이름 없음',
+                        phone: item['연락처'] || '-',
+                        address: item['주소'] || '-',
+                        amount: item['최종 견적가'] || item['견적금액'] || '0',
+                        status: (item['상태'] || '접수') as Status,
+                        partnerName: item['파트너명'] || '미지정',
+                        remarks: item['비고'] || '',
+                        documents: docsJson ? (typeof docsJson === 'string' ? JSON.parse(docsJson) : docsJson) : {}
+                    };
+                });
                 const sorted = mappedData.reverse();
                 setCustomers(sorted);
                 setFilteredCustomers(sorted);
