@@ -104,8 +104,8 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
 
                         <div className="months-section" style={{ marginTop: 'auto', order: 1 }}>
                             <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 700, color: '#374151' }}>나누어 낼 기간 (구독 개월수)</label>
-                            <div className="months-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem' }}>
-                                {[12, 24, 36, 48, 60].map((m) => (
+                            <div className="months-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+                                {[24, 36, 48, 60].map((m) => (
                                     <button
                                         key={m}
                                         onClick={() => setMonths(m)}

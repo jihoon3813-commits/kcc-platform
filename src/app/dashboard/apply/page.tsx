@@ -233,7 +233,6 @@ export default function Apply() {
                                             value={formData.months}
                                             onChange={(e) => setFormData({ ...formData, months: e.target.value })}
                                         >
-                                            <option value="12">12개월</option>
                                             <option value="24">24개월</option>
                                             <option value="36">36개월</option>
                                             <option value="48">48개월</option>
