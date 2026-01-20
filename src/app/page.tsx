@@ -58,7 +58,7 @@ export default function Home() {
                 lineHeight: 1.3,
                 wordBreak: 'keep-all'
               }}>
-                구독을 도입하면 <span style={{ color: '#fbbf24' }}>정말 계약률이 높아질까요?</span>
+                구독을 도입하면<br className="mobile-br" /> <span style={{ color: '#fbbf24' }}>정말 계약률이 높아질까요?</span>
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '0.85rem', lineHeight: 1.5, wordBreak: 'keep-all' }}>
                 네! 티유디지털이 3개월간 직접 검증한 결과입니다.

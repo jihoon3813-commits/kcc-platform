@@ -36,8 +36,8 @@ export default function Features() {
         <section id="features" style={{ backgroundColor: '#f9fafb' }}>
             <div className="container">
                 <div className="features-header" style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <h2 className="features-title" style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem', color: '#111827', wordBreak: 'keep-all' }}>왜 KCC 홈씨씨 구독 솔루션인가?</h2>
-                    <p className="features-subtitle" style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>대한민국 창호 1위 KCC의 품질은 그대로, <br />결제 방식의 혁신으로 인테리어 영업의 패러다임을 바꿉니다.</p>
+                    <h2 className="features-title" style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem', color: '#111827' }}>왜 KCC 홈씨씨<br className="mobile-br" /> 구독 솔루션인가?</h2>
+                    <p className="features-subtitle" style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>대한민국 창호 1위 KCC의 품질은 그대로, <br />결제 방식의 혁신으로 인테리어 영업의<br className="mobile-br" /> 패러다임을 바꿉니다.</p>
                 </div>
 
                 <div className="features-grid" style={{ display: 'grid', gap: '1.5rem' }}>
