@@ -27,6 +27,9 @@ export const metadata: Metadata = {
     description: "목돈 부담 제로! KCC 홈씨씨 창호 구독으로 매출을 혁신하세요. 시공 다음날 바로 정산, 99%의 승인율을 경험해 보세요.",
     images: ["https://cdn.imweb.me/upload/S20250904697320f4fd9ed/9edabde9f8bd5.png"],
   },
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
