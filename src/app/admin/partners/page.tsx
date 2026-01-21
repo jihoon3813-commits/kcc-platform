@@ -215,13 +215,40 @@ export default function AdminPartnerManagement() {
                         <h1 style={{ fontSize: '1.875rem', fontWeight: 800, color: '#f8fafc' }}>파트너 관리</h1>
                         <p style={{ color: '#64748b' }}>플랫폼에 등록된 모든 파트너사를 관리합니다. 행을 클릭하면 상세 정보를 확인합니다.</p>
                     </div>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="admin-btn-primary"
-                        style={{ padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                    >
-                        + 신규 파트너 등록
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button
+                            onClick={() => fetchPartners()}
+                            disabled={loading}
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                padding: '0.75rem 1.25rem',
+                                borderRadius: '0.75rem',
+                                backgroundColor: '#1e293b',
+                                border: '1px solid #334155',
+                                color: '#fff',
+                                fontSize: '0.9rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                gap: '0.5rem'
+                            }}
+                        >
+                            <span style={{
+                                animation: loading ? 'spin 1.5s linear infinite' : 'none',
+                                display: 'inline-block',
+                                fontSize: '1.1rem'
+                            }}>🔄</span>
+                            새로고침
+                        </button>
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="admin-btn-primary"
+                            style={{ padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                        >
+                            + 신규 파트너 등록
+                        </button>
+                    </div>
                 </header>
 
                 <div className="admin-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
@@ -388,9 +415,23 @@ export default function AdminPartnerManagement() {
                         align-items: flex-start !important;
                         gap: 1.5rem;
                     }
+                    .page-header > div:last-child {
+                        width: 100%;
+                    }
+                    .page-header > div:last-child button {
+                        flex: 1;
+                        justify-content: center;
+                    }
                 }
 
                 @media (max-width: 640px) {
+                    .page-header > div:last-child {
+                        flex-direction: column;
+                        gap: 0.75rem;
+                    }
+                    .page-header > div:last-child button {
+                        width: 100%;
+                    }
                     .detail-grid, .add-modal-grid {
                         grid-template-columns: 1fr;
                     }

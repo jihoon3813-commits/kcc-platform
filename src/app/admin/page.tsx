@@ -59,122 +59,151 @@ export default function AdminDashboard() {
     ]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchAdminData = async () => {
-            setLoading(true);
-            try {
-                // 1. Fetch Partners
-                const pRes = await fetch('/api/proxy?type=partners');
-                const pData = await pRes.json();
+    const fetchAdminData = async () => {
+        setLoading(true);
+        try {
+            const [pRes, cRes] = await Promise.all([
+                fetch('/api/proxy?type=partners'),
+                fetch('/api/proxy?type=customers')
+            ]);
+            const pData = await pRes.json();
+            const cData = await cRes.json();
 
-                // 2. Fetch Customers for stats
-                const cRes = await fetch('/api/proxy?type=customers');
-                const cData = await cRes.json();
-
-                // 3. Filter out Guest/Test Data to prevent pollution of stats
-                const validPartners = Array.isArray(pData) ? pData.filter((p: any) => {
+            if (Array.isArray(pData) && Array.isArray(cData)) {
+                // Filter out Guest/Test Data to prevent pollution of stats
+                const validPartners = pData.filter((p: any) => {
                     const pid = p['아이디'] || p['id'] || p['ID'] || '';
                     return pid !== 'guest_demo';
-                }) : [];
-
-                const validCustomers = Array.isArray(cData) ? cData.filter((c: any) => {
+                });
+                const validCustomers = cData.filter((c: any) => {
                     const pid = c['파트너ID'] || c['파트너 ID'] || c['partnerId'] || '';
                     return pid !== 'guest_demo';
-                }) : [];
+                });
 
-                if (Array.isArray(pData)) {
-                    const mappedPartners = validPartners.map((p: any) => {
-                        const find = (...keys: string[]) => {
-                            for (const key of keys) {
-                                if (p[key] !== undefined && p[key] !== null && p[key] !== '') {
-                                    return p[key].toString();
-                                }
+                const mappedPartners = validPartners.map((p: any) => {
+                    const find = (...keys: string[]) => {
+                        for (const k of keys) {
+                            if (p[k] !== undefined && p[k] !== null && p[k] !== '') {
+                                return p[k].toString();
                             }
-                            return '-';
-                        };
+                        }
+                        return '-';
+                    };
 
-                        return {
-                            id: find('아이디', 'id', 'ID', 'Id', '아이디(ID)'),
-                            name: find('파트너명', 'name', 'Name', '파트너', '업체명'),
-                            owner: find('대표자명', '대표자', '대표명', 'owner', '대표'),
-                            phone: find('연락처', '휴대폰', 'phone', '전화번호', '연락처(휴대폰)', '연락처 '),
-                            region: find('지역', 'region', 'Region', '활동위치', '소속지역'),
-                            joinDate: find('가입일', '등록일', 'date', 'JoinDate', '생성일', '등록일시'),
-                            appCount: validCustomers.filter((c: any) => c['파트너명'] === (p['파트너명'] || find('파트너명', 'name'))).length,
-                            status: '정상' as const
-                        };
-                    });
+                    return {
+                        id: find('아이디', 'id', 'ID', 'Id', '아이디(ID)'),
+                        name: find('파트너명', 'name', 'Name', '파트너', '업체명'),
+                        owner: find('대표자명', '대표자', '대표명', 'owner', '대표'),
+                        phone: find('연락처', '휴대폰', 'phone', '전화번호', '연락처(휴대폰)', '연락처 '),
+                        region: find('지역', 'region', 'Region', '활동위치', '소속지역'),
+                        joinDate: find('가입일', '등록일', 'date', 'JoinDate', '생성일', '등록일시'),
+                        appCount: validCustomers.filter((c: any) => c['파트너명'] === (p['파트너명'] || find('파트너명', 'name'))).length,
+                        status: '정상' as const
+                    };
+                });
 
-                    const sortedPartners = mappedPartners.sort((a, b) => {
-                        const dateA = new Date(a.joinDate).getTime();
-                        const dateB = new Date(b.joinDate).getTime();
-                        if (dateA !== dateB) return dateB - dateA;
-                        return b.id.localeCompare(a.id);
-                    });
-                    setRecentPartners(sortedPartners.slice(0, 5));
-                }
+                const sortedPartners = mappedPartners.sort((a, b) => {
+                    const dateA = new Date(a.joinDate).getTime();
+                    const dateB = new Date(b.joinDate).getTime();
+                    if (dateA !== dateB) return dateB - dateA;
+                    return b.id.localeCompare(a.id);
+                });
+                setRecentPartners(sortedPartners.slice(0, 5));
 
-                if (Array.isArray(cData)) {
-                    const totalAmt = validCustomers.reduce((acc: number, curr: any) => {
-                        const amt = Number(curr['최종 견적가']?.toString().replace(/,/g, '') || curr['견적금액']?.toString().replace(/,/g, '') || 0);
-                        return acc + amt;
-                    }, 0);
+                const totalAmt = validCustomers.reduce((acc: number, curr: any) => {
+                    const amt = Number(curr['최종 견적가']?.toString().replace(/,/g, '') || curr['견적금액']?.toString().replace(/,/g, '') || 0);
+                    return acc + amt;
+                }, 0);
 
-                    setStats({
-                        totalPartners: validPartners.length,
-                        totalApps: validCustomers.length,
-                        pendingApproval: validCustomers.filter((c: any) => c['상태'] === '접수' || c['상태'] === '1차승인(추가 서류 등록 必)').length,
-                        totalAmount: totalAmt,
-                        newDocsCount: validCustomers.filter((c: any) => c['상태'] === '1차서류 등록완료' || c['상태'] === '최종서류 등록완료').length
-                    });
+                setStats({
+                    totalPartners: validPartners.length,
+                    totalApps: validCustomers.length,
+                    pendingApproval: validCustomers.filter((c: any) => c['상태'] === '접수' || c['상태'] === '1차승인(추가 서류 등록 必)').length,
+                    totalAmount: totalAmt,
+                    newDocsCount: validCustomers.filter((c: any) => c['상태'] === '1차서류 등록완료' || c['상태'] === '최종서류 등록완료').length
+                });
 
-                    // Calculate real-time notifications
-                    setNotifications([
-                        { label: '신용조회 대기', count: validCustomers.filter((c: any) => c['상태'] === '접수').length, color: '#fbbf24' },
-                        { label: '1차 서류 검수', count: validCustomers.filter((c: any) => c['상태'] === '1차서류 등록완료').length, color: '#38bdf8' },
-                        { label: '최종 승인 대기', count: validCustomers.filter((c: any) => c['상태'] === '최종서류 등록완료').length, color: '#10b981' },
-                        { label: '정산 요청건', count: validCustomers.filter((c: any) => c['상태'] === '녹취완료/정산대기').length, color: '#818cf8' },
-                    ]);
+                // Calculate real-time notifications
+                setNotifications([
+                    { label: '신용조회 대기', count: validCustomers.filter((c: any) => c['상태'] === '접수').length, color: '#fbbf24' },
+                    { label: '1차 서류 검수', count: validCustomers.filter((c: any) => c['상태'] === '1차서류 등록완료').length, color: '#38bdf8' },
+                    { label: '최종 승인 대기', count: validCustomers.filter((c: any) => c['상태'] === '최종서류 등록완료').length, color: '#10b981' },
+                    { label: '정산 요청건', count: validCustomers.filter((c: any) => c['상태'] === '녹취완료/정산대기').length, color: '#818cf8' },
+                ]);
 
-                    // Calculate region stats (based on address keywords)
-                    const getCount = (keywords: string[]) =>
-                        validCustomers.filter((c: any) => keywords.some(k => c['주소']?.includes(k))).length;
+                // Calculate region stats (based on address keywords)
+                const getCount = (keywords: string[]) =>
+                    validCustomers.filter((c: any) => keywords.some(k => c['주소']?.includes(k))).length;
 
-                    const total = validCustomers.length || 1;
-                    const seoul = getCount(['서울', '세종']);
-                    const gyeonggi = getCount(['경기', '인천']);
-                    const yeongnam = getCount(['경북', '경남', '대구', '부산', '울산']);
-                    const honam = getCount(['전북', '전남', '광주', '제주', '충북', '충남', '대전', '강원']);
+                const total = validCustomers.length || 1;
+                const seoul = getCount(['서울', '세종']);
+                const gyeonggi = getCount(['경기', '인천']);
+                const yeongnam = getCount(['경북', '경남', '대구', '부산', '울산']);
+                const honam = getCount(['전북', '전남', '광주', '제주', '충북', '충남', '대전', '강원']);
 
-                    setRegionStats([
-                        { region: '서울/세종', value: Math.round((seoul / total) * 100) },
-                        { region: '경기/인천', value: Math.round((gyeonggi / total) * 100) },
-                        { region: '영남권', value: Math.round((yeongnam / total) * 100) },
-                        { region: '호남/기타', value: Math.round((honam / total) * 100) },
-                    ]);
-                }
-            } catch (err) {
-                console.error('Failed to fetch admin data:', err);
-            } finally {
-                setLoading(false);
+                setRegionStats([
+                    { region: '서울/세종', value: Math.round((seoul / total) * 100) },
+                    { region: '경기/인천', value: Math.round((gyeonggi / total) * 100) },
+                    { region: '영남권', value: Math.round((yeongnam / total) * 100) },
+                    { region: '호남/기타', value: Math.round((honam / total) * 100) },
+                ]);
             }
-        };
+        } catch (err) {
+            console.error('Failed to fetch admin data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchAdminData();
     }, []);
 
     return (
         <div className="admin-page-wrapper" style={{ display: 'flex', backgroundColor: '#020617', minHeight: '100vh' }}>
+            {loading && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 9999,
+                    backgroundColor: 'rgba(2, 6, 23, 0.7)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <div style={{
+                        width: '50px',
+                        height: '50px',
+                        border: '4px solid #1e293b',
+                        borderTopColor: '#3b82f6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <p style={{ marginTop: '1.5rem', fontSize: '1.125rem', color: '#f8fafc', fontWeight: 700, letterSpacing: '-0.025em' }}>
+                        관리 데이터를 불러오는 중입니다...
+                    </p>
+                </div>
+            )}
             <AdminSidebar />
             <main className="admin-main-container">
                 {/* Header */}
-                <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
+                <header className="admin-header">
+                    <div className="header-title-section">
                         <h1 style={{ fontSize: '1.875rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>Admin Dashboard</h1>
                         <p style={{ color: '#64748b' }}>플랫폼의 전체 운영 현황과 파트너 실적을 관리합니다.</p>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button style={{ padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: '#1e293b', color: '#fff', border: '1px solid #334155', fontWeight: 600, cursor: 'pointer' }}>보고서 다운로드</button>
+                    <div className="header-action-section">
+                        <button
+                            onClick={() => fetchAdminData()}
+                            disabled={loading}
+                            className="refresh-btn"
+                        >
+                            <span style={{ animation: loading ? 'spin 1.5s linear infinite' : 'none', display: 'inline-block' }}>🔄</span>
+                            새로고침
+                        </button>
+                        <button className="report-btn">보고서 다운로드</button>
                     </div>
                 </header>
 
@@ -290,7 +319,6 @@ export default function AdminDashboard() {
 
                         <div style={{ background: '#0f172a', padding: '1.5rem', borderRadius: '1.25rem', border: '1px solid #1e293b', flex: 1 }}>
                             <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1.25rem' }}>지역별 신청 현황</h3>
-                            {/* Simple Bar Chart Placeholder */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {regionStats.map((r, i) => (
                                     <div key={i}>
@@ -310,61 +338,122 @@ export default function AdminDashboard() {
             </main>
 
             <style jsx>{`
-                .admin-main-container {
-                    flex: 1;
-                    margin-left: 260px;
-                    padding: 2.5rem;
-                    transition: all 0.3s;
-                }
+    .admin-main-container {
+        flex: 1;
+        margin-left: 260px;
+        padding: 2.5rem;
+        transition: all 0.3s;
+    }
 
-                .stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(5, 1fr);
-                    gap: 1.5rem;
-                }
+    .admin-header {
+        margin-bottom: 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+    }
 
-                .stat-card:hover {
-                    transform: translateY(-5px);
-                    border-color: #3b82f640 !important;
-                    background: #1e293b !important;
-                }
+    .header-action-section {
+        display: flex;
+        gap: 1rem;
+        flex-shrink: 0;
+    }
 
-                .dashboard-content-grid {
-                    display: grid;
-                    grid-template-columns: 2fr 1fr;
-                    gap: 1.5rem;
-                    margin-bottom: 2rem;
-                }
+    .refresh-btn {
+        padding: 0.75rem 1.5rem;
+        borderRadius: 0.75rem;
+        background: #1e293b;
+        color: #fff;
+        border: 1px solid #334155;
+        fontWeight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
 
-                @media (max-width: 1280px) {
-                    .stats-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                    }
-                }
+    .refresh-btn:hover {
+        background: #334155;
+    }
 
-                @media (max-width: 1024px) {
-                    .admin-main-container {
-                        margin-left: 0;
-                        padding: 1.5rem;
-                        padding-bottom: 100px;
-                    }
-                    .dashboard-content-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
+    .report-btn {
+        padding: 0.75rem 1.5rem;
+        borderRadius: 0.75rem;
+        background: #3b82f6;
+        color: #fff;
+        border: none;
+        fontWeight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
 
-                @media (max-width: 640px) {
-                    .stats-grid {
-                        grid-template-columns: 1fr;
-                    }
-                    header {
-                        flex-direction: column;
-                        align-items: flex-start !important;
-                        gap: 1.5rem;
-                        margin-bottom: 2rem !important;
-                    }
-                }
-            `}</style>
+    .report-btn:hover {
+        background: #2563eb;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1.5rem;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: #3b82f640 !important;
+        background: #1e293b !important;
+    }
+
+    .dashboard-content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1280px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .admin-main-container {
+            margin-left: 0;
+            padding: 1.5rem;
+            padding-bottom: 100px;
+        }
+        .dashboard-content-grid {
+            grid-template-columns: 1fr;
+        }
+        .admin-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        .header-action-section {
+            width: 100%;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .refresh-btn, .report-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.875rem;
+        }
+    }
+`}</style>
         </div>
     );
 }

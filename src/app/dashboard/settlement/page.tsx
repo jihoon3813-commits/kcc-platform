@@ -20,23 +20,25 @@ export default function Settlement() {
     const [allCustomers, setAllCustomers] = useState<GASResponseItem[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchSettlementData = async () => {
-            try {
-                const response = await fetch('/api/proxy?type=customers');
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    setAllCustomers(data);
-                } else {
-                    console.error('Settlement data is not an array:', data);
-                    setAllCustomers([]);
-                }
-            } catch (error) {
-                console.error('Failed to fetch settlement data:', error);
-            } finally {
-                setLoading(false);
+    const fetchSettlementData = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/proxy?type=customers');
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                setAllCustomers(data);
+            } else {
+                console.error('Settlement data is not an array:', data);
+                setAllCustomers([]);
             }
-        };
+        } catch (error) {
+            console.error('Failed to fetch settlement data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchSettlementData();
     }, []);
 
@@ -68,13 +70,107 @@ export default function Settlement() {
 
     return (
         <div className="dashboard-wrapper">
+            {loading && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 9999,
+                    backgroundColor: 'rgba(255,255,255,0.5)',
+                    backdropFilter: 'blur(5px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <div style={{
+                        width: '50px',
+                        height: '50px',
+                        border: '4px solid #e2e8f0',
+                        borderTopColor: '#3b82f6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <p style={{ marginTop: '1.5rem', fontSize: '1.1rem', color: '#475569', fontWeight: 700 }}>
+                        데이터를 불러오는 중입니다...
+                    </p>
+                    <style jsx>{`
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    `}</style>
+                </div>
+            )}
             <Sidebar />
             <main className="dashboard-main">
-                <header className="mobile-header">
-                    <div>
-                        <h1 style={{ fontSize: '1.875rem' }}>정산 내역</h1>
+                <header className="dashboard-header" style={{ marginBottom: '2rem' }}>
+                    <div className="header-content">
+                        <h1 style={{ fontSize: '1.875rem', fontWeight: 700, marginBottom: '0.25rem' }}>정산 내역</h1>
                         <p style={{ color: 'var(--muted)' }}>구독 계약 체결에 따른 정산 예정 및 지급 완료 내역입니다.</p>
                     </div>
+                    <button
+                        onClick={() => fetchSettlementData()}
+                        disabled={loading}
+                        className="refresh-button"
+                    >
+                        <span style={{
+                            animation: loading ? 'spin 1s linear infinite' : 'none',
+                            display: 'inline-block',
+                            fontSize: '1.1rem'
+                        }}>🔄</span>
+                        새로고침
+                    </button>
+                    <style jsx>{`
+                        .dashboard-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 1rem;
+                        }
+                        .header-content {
+                            flex: 1;
+                            min-width: 200px;
+                        }
+                        .refresh-button {
+                            display: inline-flex;
+                            align-items: center;
+                            padding: 0.6rem 1.2rem;
+                            border-radius: 0.75rem;
+                            background-color: #fff;
+                            border: 1px solid #e2e8f0;
+                            color: #475569;
+                            font-size: 0.9rem;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            gap: 0.5rem;
+                            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                            white-space: nowrap;
+                        }
+                        .refresh-button:hover {
+                            background-color: #f8fafc;
+                            transform: translateY(-1px);
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                        }
+                        .refresh-button:disabled {
+                            opacity: 0.7;
+                            cursor: not-allowed;
+                            transform: none;
+                        }
+
+                        @media (max-width: 640px) {
+                            .dashboard-header {
+                                flex-direction: column;
+                                align-items: stretch;
+                                gap: 1.5rem;
+                            }
+                            .refresh-button {
+                                width: 100%;
+                                justify-content: center;
+                                padding: 0.8rem;
+                            }
+                        }
+                    `}</style>
                 </header>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>

@@ -10,7 +10,7 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
     const [amount, setAmount] = useState(15000000);
     const [months, setMonths] = useState(60);
 
-    const annualRate = 0.10; // 연이율 10%
+    const annualRate = 0.112; // 연이율 11.2%
     const monthlyRate = annualRate / 12;
 
     // 원리금 균등 상환 공식: A = P * { r(1+r)^n / ((1+r)^n - 1) }

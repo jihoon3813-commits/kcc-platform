@@ -7,7 +7,7 @@ export default function DashboardCalculator() {
     const [amount, setAmount] = useState(15000000);
     const [months, setMonths] = useState(60);
 
-    const annualRate = 0.10; // 연이율 10%
+    const annualRate = 0.112; // 연이율 11.2%
     const monthlyRate = annualRate / 12;
 
     // 원리금 균등 상환 공식: A = P * { r(1+r)^n / ((1+r)^n - 1) }
@@ -101,7 +101,7 @@ export default function DashboardCalculator() {
                             </p>
                         </div>
                         <p style={{ fontSize: '0.9rem', color: 'var(--muted)', textAlign: 'right' }}>
-                            ※구독료는 일시불 금액 기준 연 10%(원리금균등상환) 이자를 포함한 금액입니다.
+                            ※구독료는 일시불 금액 기준 연 11.2%(원리금균등상환) 이자를 포함한 금액입니다.
                         </p>
                     </div>
                 </div>

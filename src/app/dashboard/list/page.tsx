@@ -236,11 +236,75 @@ export default function CustomerList() {
             )}
             <Sidebar />
             <main className="dashboard-main">
-                <header className="mobile-header" style={{ marginBottom: '2rem' }}>
-                    <div>
-                        <h1 style={{ fontSize: '1.875rem' }}>고객 관리</h1>
+                <header className="dashboard-header" style={{ marginBottom: '2rem' }}>
+                    <div className="header-content">
+                        <h1 style={{ fontSize: '1.875rem', fontWeight: 700, marginBottom: '0.25rem' }}>고객 관리</h1>
                         <p style={{ color: 'var(--muted)' }}>등록된 모든 고객 신청 내역을 조회하고 관리합니다.</p>
                     </div>
+                    <button
+                        onClick={() => fetchCustomers()}
+                        disabled={loading}
+                        className="refresh-button"
+                    >
+                        <span style={{
+                            animation: loading ? 'spin 1s linear infinite' : 'none',
+                            display: 'inline-block',
+                            fontSize: '1.1rem'
+                        }}>🔄</span>
+                        새로고침
+                    </button>
+                    <style jsx>{`
+                        .dashboard-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 1rem;
+                        }
+                        .header-content {
+                            flex: 1;
+                            min-width: 200px;
+                        }
+                        .refresh-button {
+                            display: inline-flex;
+                            align-items: center;
+                            padding: 0.6rem 1.2rem;
+                            border-radius: 0.75rem;
+                            background-color: #fff;
+                            border: 1px solid #e2e8f0;
+                            color: #475569;
+                            font-size: 0.9rem;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            gap: 0.5rem;
+                            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                            white-space: nowrap;
+                        }
+                        .refresh-button:hover {
+                            background-color: #f8fafc;
+                            transform: translateY(-1px);
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                        }
+                        .refresh-button:disabled {
+                            opacity: 0.7;
+                            cursor: not-allowed;
+                            transform: none;
+                        }
+
+                        @media (max-width: 640px) {
+                            .dashboard-header {
+                                flex-direction: column;
+                                align-items: stretch;
+                                gap: 1.5rem;
+                            }
+                            .refresh-button {
+                                width: 100%;
+                                justify-content: center;
+                                padding: 0.8rem;
+                            }
+                        }
+                    `}</style>
                 </header>
 
                 <section className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>

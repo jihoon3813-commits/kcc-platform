@@ -65,11 +65,63 @@ export default function AdminSettlement() {
 
     return (
         <div className="admin-page-wrapper" style={{ display: 'flex', backgroundColor: '#020617', minHeight: '100vh' }}>
+            {loading && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 9999,
+                    backgroundColor: 'rgba(2, 6, 23, 0.7)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <div style={{
+                        width: '50px',
+                        height: '50px',
+                        border: '4px solid #1e293b',
+                        borderTopColor: '#3b82f6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <p style={{ marginTop: '1.5rem', fontSize: '1.125rem', color: '#f8fafc', fontWeight: 700, letterSpacing: '-0.025em' }}>
+                        정산 데이터를 불러오는 중입니다...
+                    </p>
+                </div>
+            )}
             <AdminSidebar />
             <main className="admin-main-container">
-                <header className="page-header" style={{ marginBottom: '2rem' }}>
-                    <h1 style={{ fontSize: '1.875rem', fontWeight: 800, color: '#f8fafc' }}>정산 관리</h1>
-                    <p style={{ color: '#64748b' }}>파트너사별 정산 요청 내역을 검토하고 지급 완료 처리합니다.</p>
+                <header className="page-header" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <h1 style={{ fontSize: '1.875rem', fontWeight: 800, color: '#f8fafc' }}>정산 관리</h1>
+                        <p style={{ color: '#64748b' }}>파트너사별 정산 요청 내역을 검토하고 지급 완료 처리합니다.</p>
+                    </div>
+                    <button
+                        onClick={() => fetchSettlements()}
+                        disabled={loading}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '0.6rem 1.2rem',
+                            borderRadius: '0.75rem',
+                            backgroundColor: '#1e293b',
+                            border: '1px solid #334155',
+                            color: '#fff',
+                            fontSize: '0.9rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            gap: '0.5rem'
+                        }}
+                    >
+                        <span style={{
+                            animation: loading ? 'spin 1.5s linear infinite' : 'none',
+                            display: 'inline-block',
+                            fontSize: '1.1rem'
+                        }}>🔄</span>
+                        새로고침
+                    </button>
                 </header>
 
                 <section className="settlement-stats-grid" style={{ marginBottom: '2rem' }}>
@@ -146,6 +198,10 @@ export default function AdminSettlement() {
                     margin-left: 260px;
                     padding: 2.5rem;
                     transition: all 0.3s;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
                 }
 
                 .settlement-stats-grid {
