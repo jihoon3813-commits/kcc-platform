@@ -166,13 +166,20 @@ export default function Apply() {
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>주소 (시공 장소)</label>
-                                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'stretch' }}>
                                         <input
                                             type="text"
                                             placeholder="기본 주소"
                                             readOnly
                                             required
-                                            style={{ flex: 1, padding: '0.875rem', borderRadius: '0.5rem', border: '1px solid var(--border)', background: '#f3f4f6' }}
+                                            style={{
+                                                flex: 1,
+                                                padding: '0.875rem',
+                                                borderRadius: '0.5rem',
+                                                border: '1px solid var(--border)',
+                                                background: '#f3f4f6',
+                                                minWidth: 0
+                                            }}
                                             value={formData.address}
                                             onClick={() => setIsAddressOpen(true)}
                                         />
@@ -180,13 +187,13 @@ export default function Apply() {
                                             type="button"
                                             onClick={() => setIsAddressOpen(true)}
                                             style={{
-                                                padding: '0 1.25rem',
+                                                padding: '0 1rem',
                                                 borderRadius: '0.5rem',
                                                 border: '1px solid var(--border)',
                                                 background: 'white',
-                                                fontWeight: 600,
+                                                fontWeight: 700,
                                                 whiteSpace: 'nowrap',
-                                                minWidth: 'fit-content',
+                                                flexShrink: 0,
                                                 fontSize: '0.875rem'
                                             }}
                                         >
