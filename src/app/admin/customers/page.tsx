@@ -227,6 +227,8 @@ function AdminCustomerListContent() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('전체');
+    const [filterPartner, setFilterPartner] = useState('전체');
+    const [partners, setPartners] = useState<string[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const searchParams = useSearchParams();
     const initialFilter = searchParams.get('filter');
@@ -239,10 +241,20 @@ function AdminCustomerListContent() {
     const fetchAllCustomers = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/proxy?type=customers');
-            const data = await response.json();
+            const [cRes, pRes] = await Promise.all([
+                fetch('/api/proxy?type=customers'),
+                fetch('/api/proxy?type=partners')
+            ]);
+            const data = await cRes.json();
+            const pData = await pRes.json();
+
+            if (Array.isArray(pData)) {
+                const uniquePartners = Array.from(new Set(pData.map((p: any) => p['파트너명'] || p['name'] || '').filter(Boolean))) as string[];
+                setPartners(uniquePartners.sort());
+            }
 
             if (Array.isArray(data)) {
+                // ... (rest of the mapping logic remains same)
                 const mappedData = data.map((item: any) => {
                     const docsJson = item['documents'] || item['서류'] || item['서류관리'] || item['서류 JSON'] || item['서류JSON'];
                     return {
@@ -276,20 +288,28 @@ function AdminCustomerListContent() {
 
     useEffect(() => {
         fetchAllCustomers();
-        if (initialFilter === 'pending_docs') {
+        const filter = searchParams.get('filter');
+        const partnerName = searchParams.get('partnerName');
+
+        if (filter === 'pending_docs') {
             setFilterStatus('서류검수필요');
         }
-    }, [initialFilter]);
+        if (partnerName) {
+            setFilterPartner(partnerName);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const filtered = customers.filter(c => {
             // 1. Search Filter
             const matchesSearch = c.name.includes(searchTerm) || c.partnerName.includes(searchTerm) || c.phone.includes(searchTerm);
 
-            // 2. Status Filter
+            // 2. Status & Partner Filter
             const isPendingDocs = c.status === '1차서류 등록완료' || c.status === '최종서류 등록완료';
             const matchesStatus = filterStatus === '전체' ||
                 (filterStatus === '서류검수필요' ? isPendingDocs : c.status === filterStatus);
+
+            const matchesPartner = filterPartner === '전체' || c.partnerName === filterPartner;
 
             // 3. Date Filter
             let matchesDate = true;
@@ -320,10 +340,10 @@ function AdminCustomerListContent() {
                 }
             }
 
-            return matchesSearch && matchesStatus && matchesDate;
+            return matchesSearch && matchesStatus && matchesPartner && matchesDate;
         });
         setFilteredCustomers(filtered);
-    }, [searchTerm, filterStatus, datePreset, startDate, endDate, customers]);
+    }, [searchTerm, filterStatus, filterPartner, datePreset, startDate, endDate, customers]);
 
     return (
         <div className="admin-page-wrapper" style={{ display: 'flex', backgroundColor: '#020617', minHeight: '100vh' }}>
@@ -403,12 +423,23 @@ function AdminCustomerListContent() {
                             onChange={(e) => setFilterStatus(e.target.value)}
                             style={{
                                 padding: '0.75rem 1rem', borderRadius: '0.75rem', background: '#1e293b',
-                                border: '1px solid #334155', color: '#fff', outline: 'none'
+                                border: '1px solid #334155', color: '#fff', outline: 'none', flex: '1', maxWidth: '200px'
                             }}
                         >
                             <option value="전체">모든 상태</option>
-                            <option value="서류검수필요">📂 신규 서류 등록 (검수 필요)</option>
+                            <option value="서류검수필요">📂 검수 필요</option>
                             {statusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                        <select
+                            value={filterPartner}
+                            onChange={(e) => setFilterPartner(e.target.value)}
+                            style={{
+                                padding: '0.75rem 1rem', borderRadius: '0.75rem', background: '#1e293b',
+                                border: '1px solid #334155', color: '#fff', outline: 'none', flex: '1', maxWidth: '200px'
+                            }}
+                        >
+                            <option value="전체">모든 파트너사</option>
+                            {partners.map(p => <option key={p} value={p}>{p}</option>)}
                         </select>
                     </div>
 

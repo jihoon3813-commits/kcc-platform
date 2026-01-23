@@ -2,16 +2,20 @@
 
 import AdminSidebar from '@/components/AdminSidebar';
 import { useState, useEffect } from 'react';
-
+import { useRouter } from 'next/navigation';
 interface Partner {
     id: string;
     name: string;
-    owner: string;
-    phone: string;
     region: string;
     joinDate: string;
     appCount: number;
     status: '정상' | '정지';
+    owner: string;
+    phone: string;
+    email: string;
+    address: string;
+    bizNum: string;
+    account: string;
 }
 
 interface Stats {
@@ -36,6 +40,60 @@ const formatDate = (val: string) => {
     }
 };
 
+const PartnerDetailModal = ({ partner, onClose, onDelete }: { partner: Partner; onClose: () => void; onDelete: (id: string) => void }) => {
+    return (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }} onClick={onClose}>
+            <div style={{ background: '#0f172a', width: '700px', maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', borderRadius: '1.25rem', border: '1px solid #334155', padding: '2rem', color: '#fff' }} onClick={event => event.stopPropagation()}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '1.5rem', borderBottom: '1px solid #334155', paddingBottom: '1rem' }}>파트너 상세 정보</h2>
+                <div className="detail-grid">
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>아이디</div>
+                    <div style={{ fontSize: '1rem' }}>{partner.id}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>파트너사명</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>{partner.name}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>대표자명</div>
+                    <div style={{ fontSize: '1rem' }}>{partner.owner}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>연락처</div>
+                    <div style={{ fontSize: '1rem' }}>{partner.phone}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>이메일</div>
+                    <div style={{ fontSize: '1rem' }}>{partner.email}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>지역</div>
+                    <div style={{ fontSize: '1rem' }}>{partner.region}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>주소</div>
+                    <div style={{ fontSize: '1rem' }}>{partner.address}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>사업자번호</div>
+                    <div style={{ fontSize: '1rem' }}>{partner.bizNum}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>정산계좌</div>
+                    <div style={{ fontSize: '1rem' }}>{partner.account}</div>
+
+                    <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>가입일</div>
+                    <div style={{ fontSize: '1rem' }}>{formatDate(partner.joinDate)}</div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #334155' }}>
+                    <button
+                        onClick={() => {
+                            if (confirm('정말로 이 파트너사를 삭제하시겠습니까? 관련 데이터는 유지되나 로그인이 불가능해집니다.')) {
+                                onDelete(partner.id);
+                            }
+                        }}
+                        style={{ padding: '0.75rem 1.5rem', borderRadius: '0.5rem', background: '#450a0a', color: '#f87171', border: '1px solid #7f1d1d', cursor: 'pointer', fontWeight: 700 }}
+                    >
+                        파트너 삭제
+                    </button>
+                    <button onClick={onClose} style={{ padding: '0.75rem 1.5rem', borderRadius: '0.5rem', background: '#334155', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>닫기</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function AdminDashboard() {
     const [stats, setStats] = useState<Stats>({
         totalPartners: 0,
@@ -58,6 +116,14 @@ export default function AdminDashboard() {
         { region: '호남권', value: 0 },
     ]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
+
+    // Modal states
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+    const [newPartner, setNewPartner] = useState({
+        id: '', password: '', name: '', owner: '', phone: '', address: '', region: '', bizNum: '', account: '', email: ''
+    });
 
     const fetchAdminData = async () => {
         setLoading(true);
@@ -71,20 +137,20 @@ export default function AdminDashboard() {
 
             if (Array.isArray(pData) && Array.isArray(cData)) {
                 // Filter out Guest/Test Data to prevent pollution of stats
-                const validPartners = pData.filter((p: any) => {
+                const validPartners = pData.filter((p: Record<string, string | number | null>) => {
                     const pid = p['아이디'] || p['id'] || p['ID'] || '';
                     return pid !== 'guest_demo';
                 });
-                const validCustomers = cData.filter((c: any) => {
+                const validCustomers = cData.filter((c: Record<string, string | number | null>) => {
                     const pid = c['파트너ID'] || c['파트너 ID'] || c['partnerId'] || '';
                     return pid !== 'guest_demo';
                 });
 
-                const mappedPartners = validPartners.map((p: any) => {
+                const mappedPartners = validPartners.map((p: Record<string, string | number | null>) => {
                     const find = (...keys: string[]) => {
                         for (const k of keys) {
                             if (p[k] !== undefined && p[k] !== null && p[k] !== '') {
-                                return p[k].toString();
+                                return p[k]!.toString();
                             }
                         }
                         return '-';
@@ -95,9 +161,13 @@ export default function AdminDashboard() {
                         name: find('파트너명', 'name', 'Name', '파트너', '업체명'),
                         owner: find('대표자명', '대표자', '대표명', 'owner', '대표'),
                         phone: find('연락처', '휴대폰', 'phone', '전화번호', '연락처(휴대폰)', '연락처 '),
+                        email: find('이메일', 'email', 'Email', '메일주소'),
+                        bizNum: find('사업자번호', '사업자', '사업자등록번호', 'bizNum'),
+                        address: find('주소', 'address', 'Address', '영업소주소'),
+                        account: find('법인계좌', '계좌번호', '정산계좌', '계좌', '입금계좌'),
                         region: find('지역', 'region', 'Region', '활동위치', '소속지역'),
                         joinDate: find('가입일', '등록일', 'date', 'JoinDate', '생성일', '등록일시'),
-                        appCount: validCustomers.filter((c: any) => c['파트너명'] === (p['파트너명'] || find('파트너명', 'name'))).length,
+                        appCount: validCustomers.filter((c: Record<string, string | number | null>) => c['파트너명'] === (p['파트너명'] || find('파트너명', 'name'))).length,
                         status: '정상' as const
                     };
                 });
@@ -110,7 +180,7 @@ export default function AdminDashboard() {
                 });
                 setRecentPartners(sortedPartners.slice(0, 5));
 
-                const totalAmt = validCustomers.reduce((acc: number, curr: any) => {
+                const totalAmt = validCustomers.reduce((acc: number, curr: Record<string, string | number | null>) => {
                     const amt = Number(curr['최종 견적가']?.toString().replace(/,/g, '') || curr['견적금액']?.toString().replace(/,/g, '') || 0);
                     return acc + amt;
                 }, 0);
@@ -118,22 +188,22 @@ export default function AdminDashboard() {
                 setStats({
                     totalPartners: validPartners.length,
                     totalApps: validCustomers.length,
-                    pendingApproval: validCustomers.filter((c: any) => c['상태'] === '접수' || c['상태'] === '1차승인(추가 서류 등록 必)').length,
+                    pendingApproval: validCustomers.filter((c: Record<string, string | number | null>) => c['상태'] === '접수' || c['상태'] === '1차승인(추가 서류 등록 必)').length,
                     totalAmount: totalAmt,
-                    newDocsCount: validCustomers.filter((c: any) => c['상태'] === '1차서류 등록완료' || c['상태'] === '최종서류 등록완료').length
+                    newDocsCount: validCustomers.filter((c: Record<string, string | number | null>) => c['상태'] === '1차서류 등록완료' || c['상태'] === '최종서류 등록완료').length
                 });
 
                 // Calculate real-time notifications
                 setNotifications([
-                    { label: '신용조회 대기', count: validCustomers.filter((c: any) => c['상태'] === '접수').length, color: '#fbbf24' },
-                    { label: '1차 서류 검수', count: validCustomers.filter((c: any) => c['상태'] === '1차서류 등록완료').length, color: '#38bdf8' },
-                    { label: '최종 승인 대기', count: validCustomers.filter((c: any) => c['상태'] === '최종서류 등록완료').length, color: '#10b981' },
-                    { label: '정산 요청건', count: validCustomers.filter((c: any) => c['상태'] === '녹취완료/정산대기').length, color: '#818cf8' },
+                    { label: '신용조회 대기', count: validCustomers.filter((c: Record<string, string | number | null>) => c['상태'] === '접수').length, color: '#fbbf24' },
+                    { label: '1차 서류 검수', count: validCustomers.filter((c: Record<string, string | number | null>) => c['상태'] === '1차서류 등록완료').length, color: '#38bdf8' },
+                    { label: '최종 승인 대기', count: validCustomers.filter((c: Record<string, string | number | null>) => c['상태'] === '최종서류 등록완료').length, color: '#10b981' },
+                    { label: '정산 요청건', count: validCustomers.filter((c: Record<string, string | number | null>) => c['상태'] === '녹취완료/정산대기').length, color: '#818cf8' },
                 ]);
 
                 // Calculate region stats (based on address keywords)
                 const getCount = (keywords: string[]) =>
-                    validCustomers.filter((c: any) => keywords.some(k => c['주소']?.includes(k))).length;
+                    validCustomers.filter((c: Record<string, string | number | null>) => keywords.some(k => c['주소']?.toString().includes(k))).length;
 
                 const total = validCustomers.length || 1;
                 const seoul = getCount(['서울', '세종']);
@@ -148,8 +218,8 @@ export default function AdminDashboard() {
                     { region: '호남/기타', value: Math.round((honam / total) * 100) },
                 ]);
             }
-        } catch (err) {
-            console.error('Failed to fetch admin data:', err);
+        } catch {
+            console.error('Failed to fetch admin data');
         } finally {
             setLoading(false);
         }
@@ -158,6 +228,53 @@ export default function AdminDashboard() {
     useEffect(() => {
         fetchAdminData();
     }, []);
+
+    const handleCreatePartner = async () => {
+        if (!newPartner.id || !newPartner.password || !newPartner.name) {
+            alert('필수 정보를 입력해주세요.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const res = await fetch('/api/proxy', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'createPartner', ...newPartner, origin: 'admin' })
+            });
+            if (res.ok) {
+                alert('파트너가 성공적으로 등록되었습니다.');
+                setShowAddModal(false);
+                setNewPartner({ id: '', password: '', name: '', owner: '', phone: '', address: '', region: '', bizNum: '', account: '', email: '' });
+                fetchAdminData();
+            }
+        } catch {
+            alert('등록 실패');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeletePartner = async (partnerId: string) => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/proxy', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'deletePartner', id: partnerId })
+            });
+
+            if (res.ok) {
+                alert('파트너사가 삭제되었습니다.');
+                setSelectedPartner(null);
+                fetchAdminData();
+            } else {
+                alert('삭제에 실패했습니다.');
+            }
+        } catch {
+            alert('삭제 중 오류가 발생했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="admin-page-wrapper" style={{ display: 'flex', backgroundColor: '#020617', minHeight: '100vh' }}>
@@ -210,10 +327,10 @@ export default function AdminDashboard() {
                 {/* Stats Grid */}
                 <section className="stats-grid" style={{ marginBottom: '3rem' }}>
                     {[
-                        { label: '누적 파트너사', value: `${stats.totalPartners.toLocaleString()}개`, icon: '🏢', color: '#38bdf8' },
-                        { label: '누적 신청 건수', value: `${stats.totalApps.toLocaleString()}건`, icon: '📝', color: '#818cf8' },
-                        { label: '승인 대기', value: `${stats.pendingApproval}건`, icon: '⏳', color: '#fbbf24' },
-                        { label: '누적 매출액', value: `${(stats.totalAmount / 100000000).toFixed(1)}억`, icon: '💎', color: '#10b981' },
+                        { label: '누적 파트너사', value: `${stats.totalPartners.toLocaleString()}개`, icon: '🏢', color: '#38bdf8', link: '/admin/partners' },
+                        { label: '누적 신청 건수', value: `${stats.totalApps.toLocaleString()}건`, icon: '📝', color: '#818cf8', link: '/admin/customers' },
+                        { label: '승인 대기', value: `${stats.pendingApproval}건`, icon: '⏳', color: '#fbbf24', link: '/admin/customers?filter=pending' },
+                        { label: '누적 매출액', value: `${(stats.totalAmount / 100000000).toFixed(1)}억`, icon: '💎', color: '#10b981', link: '/admin/settlement' },
                         {
                             label: '신규등록 서류',
                             value: `${stats.newDocsCount}건`,
@@ -224,7 +341,7 @@ export default function AdminDashboard() {
                         },
                     ].map((s, i) => (
                         <div key={i}
-                            onClick={() => s.link && (window.location.href = s.link)}
+                            onClick={() => s.link && router.push(s.link)}
                             style={{
                                 background: '#0f172a',
                                 padding: '1.5rem',
@@ -257,7 +374,12 @@ export default function AdminDashboard() {
                     <section style={{ background: '#0f172a', borderRadius: '1.25rem', border: '1px solid #1e293b', overflow: 'hidden' }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h3 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#f8fafc' }}>전국 파트너사 현황</h3>
-                            <button style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', background: '#3b82f6', color: '#fff', border: 'none', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>신규 파트너 등록</button>
+                            <button
+                                onClick={() => setShowAddModal(true)}
+                                style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', background: '#3b82f6', color: '#fff', border: 'none', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                신규 파트너 등록
+                            </button>
                         </div>
                         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
@@ -276,7 +398,17 @@ export default function AdminDashboard() {
                                         <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}>
                                             <td style={{ padding: '1rem 1.5rem', fontWeight: 700, color: '#fff' }}>{p.name}</td>
                                             <td style={{ padding: '1rem 1.5rem' }}>{p.region}</td>
-                                            <td style={{ padding: '1rem 1.5rem' }}>{p.appCount}건</td>
+                                            <td style={{ padding: '1rem 1.5rem' }}>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        router.push(`/admin/customers?partnerName=${encodeURIComponent(p.name)}`);
+                                                    }}
+                                                    style={{ background: 'none', border: 'none', color: '#38bdf8', fontWeight: 800, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}
+                                                >
+                                                    {p.appCount}건
+                                                </button>
+                                            </td>
                                             <td style={{ padding: '1rem 1.5rem' }}>{formatDate(p.joinDate)}</td>
                                             <td style={{ padding: '1rem 1.5rem' }}>
                                                 <span style={{
@@ -292,7 +424,15 @@ export default function AdminDashboard() {
                                                 </span>
                                             </td>
                                             <td style={{ padding: '1rem 1.5rem' }}>
-                                                <button style={{ color: '#38bdf8', background: 'none', border: 'none', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>설정</button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedPartner(p);
+                                                    }}
+                                                    style={{ color: '#38bdf8', background: 'none', border: 'none', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                                                >
+                                                    설정
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -336,6 +476,34 @@ export default function AdminDashboard() {
                     </section>
                 </div>
             </main>
+
+            {/* Modals */}
+            {selectedPartner && (
+                <PartnerDetailModal
+                    partner={selectedPartner}
+                    onClose={() => setSelectedPartner(null)}
+                    onDelete={handleDeletePartner}
+                />
+            )}
+
+            {showAddModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }} onClick={() => setShowAddModal(false)}>
+                    <div style={{ background: '#0f172a', width: '600px', maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', borderRadius: '1.25rem', border: '1px solid #334155', padding: '2rem' }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', marginBottom: '1.5rem' }}>신규 파트너 등록</h2>
+                        <div className="add-modal-grid">
+                            <div><label style={{ color: '#94a3b8', fontSize: '0.75rem' }}>아이디(로그인)</label><input type="text" value={newPartner.id} onChange={e => setNewPartner({ ...newPartner, id: e.target.value })} style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#1e293b', border: '1px solid #334155', color: '#fff' }} /></div>
+                            <div><label style={{ color: '#94a3b8', fontSize: '0.75rem' }}>비밀번호</label><input type="password" value={newPartner.password} onChange={e => setNewPartner({ ...newPartner, password: e.target.value })} style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#1e293b', border: '1px solid #334155', color: '#fff' }} /></div>
+                            <div><label style={{ color: '#94a3b8', fontSize: '0.75rem' }}>파트너사명</label><input type="text" value={newPartner.name} onChange={e => setNewPartner({ ...newPartner, name: e.target.value })} style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#1e293b', border: '1px solid #334155', color: '#fff' }} /></div>
+                            <div><label style={{ color: '#94a3b8', fontSize: '0.75rem' }}>대표자명</label><input type="text" value={newPartner.owner} onChange={e => setNewPartner({ ...newPartner, owner: e.target.value })} style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#1e293b', border: '1px solid #334155', color: '#fff' }} /></div>
+                            <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#94a3b8', fontSize: '0.75rem' }}>연락처</label><input type="text" value={newPartner.phone} onChange={e => setNewPartner({ ...newPartner, phone: e.target.value })} style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#1e293b', border: '1px solid #334155', color: '#fff' }} /></div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button onClick={() => setShowAddModal(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', background: '#334155', color: '#fff', border: 'none', cursor: 'pointer' }}>취소</button>
+                            <button onClick={handleCreatePartner} style={{ flex: 2, padding: '0.75rem', borderRadius: '0.5rem', background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer' }}>등록하기</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style jsx>{`
     .admin-main-container {
@@ -408,6 +576,22 @@ export default function AdminDashboard() {
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    }
+
+    .add-modal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 1rem 2rem;
         margin-bottom: 2rem;
     }
 
