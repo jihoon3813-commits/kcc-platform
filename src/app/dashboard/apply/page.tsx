@@ -179,7 +179,16 @@ export default function Apply() {
                                         <button
                                             type="button"
                                             onClick={() => setIsAddressOpen(true)}
-                                            style={{ padding: '0 1.5rem', borderRadius: '0.5rem', border: '1px solid var(--border)', background: 'white', fontWeight: 600 }}
+                                            style={{
+                                                padding: '0 1.25rem',
+                                                borderRadius: '0.5rem',
+                                                border: '1px solid var(--border)',
+                                                background: 'white',
+                                                fontWeight: 600,
+                                                whiteSpace: 'nowrap',
+                                                minWidth: 'fit-content',
+                                                fontSize: '0.875rem'
+                                            }}
                                         >
                                             주소 검색
                                         </button>
@@ -195,7 +204,7 @@ export default function Apply() {
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>최종 견적금액(구독원금)</label>
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'stretch' }}>
                                         <input
                                             type="text"
                                             inputMode="numeric"
@@ -206,19 +215,25 @@ export default function Apply() {
                                                 padding: '0.875rem',
                                                 borderRadius: '0.5rem 0 0 0.5rem',
                                                 border: '1px solid var(--border)',
-                                                borderRight: 'none'
+                                                borderRight: 'none',
+                                                outline: 'none',
+                                                fontSize: '1rem'
                                             }}
                                             value={formData.amount}
                                             onChange={handleAmountChange}
                                         />
                                         <div style={{
-                                            padding: '0.875rem 1rem',
-                                            background: 'var(--muted-light)',
+                                            padding: '0 1.25rem',
+                                            background: '#f8fafc',
                                             border: '1px solid var(--border)',
                                             borderRadius: '0 0.5rem 0.5rem 0',
-                                            fontWeight: 600,
-                                            color: '#555',
-                                            fontSize: '0.875rem'
+                                            fontWeight: 700,
+                                            color: '#475569',
+                                            fontSize: '0.875rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            borderLeft: '1px solid var(--border)'
                                         }}>
                                             원
                                         </div>
