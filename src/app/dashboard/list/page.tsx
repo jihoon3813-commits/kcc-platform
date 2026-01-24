@@ -2,6 +2,7 @@
 
 import Sidebar from '@/components/Sidebar';
 import { useState, useEffect } from 'react';
+import DaumPostcodeEmbed from 'react-daum-postcode';
 
 type Status =
     | '접수'
@@ -93,11 +94,16 @@ export default function CustomerList() {
                     const amount = isNaN(Number(sanitizedAmount)) ? '0' : Number(sanitizedAmount).toLocaleString();
 
                     const docsJson = item['documents'] || item['서류'] || item['서류관리'] || item['서류 JSON'] || item['서류JSON'];
+                    const birthDateRaw = item['생년월일'] || '-';
+                    const birthDate = (birthDateRaw.toString().includes('T'))
+                        ? birthDateRaw.toString().split('T')[0]
+                        : birthDateRaw;
+
                     return {
                         id: item['고객번호'] || item['고객 번호'] || item.ID || item.id || Math.random(),
                         name: item['신청자명'] || '이름 없음',
                         phone: item['연락처'] || '-',
-                        birthDate: item['생년월일'] || '-',
+                        birthDate: birthDate,
                         address: item['주소'] || '-',
                         amount: amount,
                         months: item['구독기간'] || '-',
@@ -531,9 +537,12 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
         name: customer.name,
         phone: customer.phone,
         amount: customer.amount,
-        address: customer.address
+        address: customer.address,
+        months: customer.months,
+        transferDate: customer.transferDate
     });
     const [deleting, setDeleting] = useState(false);
+    const [isAddressOpen, setIsAddressOpen] = useState(false);
 
     const firstRoundDocs = [
         '신분증사본', '통장사본(자동이체)', '부동산 등기부 등본(원본)',
@@ -651,10 +660,23 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                             customerName: editData.name,
                             phone: editData.phone,
                             amount: editData.amount.replace(/,/g, ''),
-                            address: editData.address
+                            address: editData.address,
+                            months: editData.months,
+                            transferDate: editData.transferDate
                         })
                     });
-                    onUpdate({ ...customer, status: nextStatus, remarks, documents: updatedDocs, name: editData.name, phone: editData.phone, amount: editData.amount, address: editData.address });
+                    onUpdate({
+                        ...customer,
+                        status: nextStatus,
+                        remarks,
+                        documents: updatedDocs,
+                        name: editData.name,
+                        phone: editData.phone,
+                        amount: editData.amount,
+                        address: editData.address,
+                        months: editData.months,
+                        transferDate: editData.transferDate
+                    });
                     alert('필수 서류가 모두 등록되어 "1차서류 등록완료"로 자동 변경되었습니다.');
                     onClose();
                     return;
@@ -676,10 +698,23 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                             customerName: editData.name,
                             phone: editData.phone,
                             amount: editData.amount.replace(/,/g, ''),
-                            address: editData.address
+                            address: editData.address,
+                            months: editData.months,
+                            transferDate: editData.transferDate
                         })
                     });
-                    onUpdate({ ...customer, status: nextStatus, remarks, documents: updatedDocs, name: editData.name, phone: editData.phone, amount: editData.amount, address: editData.address });
+                    onUpdate({
+                        ...customer,
+                        status: nextStatus,
+                        remarks,
+                        documents: updatedDocs,
+                        name: editData.name,
+                        phone: editData.phone,
+                        amount: editData.amount,
+                        address: editData.address,
+                        months: editData.months,
+                        transferDate: editData.transferDate
+                    });
                     alert('시공 계약서가 등록되어 "최종서류 등록완료"로 자동 변경되었습니다.');
                     onClose();
                     return;
@@ -767,7 +802,9 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                     customerName: editData.name,
                     phone: editData.phone,
                     amount: editData.amount.toString().replace(/,/g, ''),
-                    address: editData.address
+                    address: editData.address,
+                    months: editData.months,
+                    transferDate: editData.transferDate
                 })
             });
 
@@ -780,7 +817,9 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                     name: editData.name,
                     phone: editData.phone,
                     amount: editData.amount,
-                    address: editData.address
+                    address: editData.address,
+                    months: editData.months,
+                    transferDate: editData.transferDate
                 });
                 if (finalStatus !== status) {
                     const message = finalStatus.includes('서류 등록완료')
@@ -888,21 +927,57 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                             </div>
                             <div>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>구독 기간</p>
-                                <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{customer.months}개월</p>
+                                {isEditing ? (
+                                    <select
+                                        value={editData.months}
+                                        onChange={(e) => setEditData({ ...editData, months: e.target.value })}
+                                        style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
+                                    >
+                                        <option value="60">60개월</option>
+                                        <option value="48">48개월</option>
+                                        <option value="36">36개월</option>
+                                        <option value="24">24개월</option>
+                                        <option value="12">12개월</option>
+                                    </select>
+                                ) : (
+                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.months}개월</p>
+                                )}
                             </div>
                             <div>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>이체 희망일</p>
-                                <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>매월 {customer.transferDate}일</p>
+                                {isEditing ? (
+                                    <select
+                                        value={editData.transferDate}
+                                        onChange={(e) => setEditData({ ...editData, transferDate: e.target.value })}
+                                        style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
+                                    >
+                                        <option value="5">매월 5일</option>
+                                        <option value="10">매월 10일</option>
+                                        <option value="15">매월 15일</option>
+                                        <option value="20">매월 20일</option>
+                                        <option value="25">매월 25일</option>
+                                    </select>
+                                ) : (
+                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>매월 {editData.transferDate}일</p>
+                                )}
                             </div>
                             <div style={{ gridColumn: 'span 2' }}>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>시공 주소</p>
                                 {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={editData.address}
-                                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                                        style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
-                                    />
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <input
+                                            type="text"
+                                            value={editData.address}
+                                            readOnly
+                                            style={{ flex: 1, padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem', background: '#f8fafc' }}
+                                        />
+                                        <button
+                                            onClick={() => setIsAddressOpen(true)}
+                                            style={{ padding: '0.4rem 0.8rem', borderRadius: '0.3rem', border: '1px solid var(--primary)', color: 'var(--primary)', background: 'white', fontSize: '0.8rem', fontWeight: 700 }}
+                                        >
+                                            주소 검색
+                                        </button>
+                                    </div>
                                 ) : (
                                     <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.address}</p>
                                 )}
@@ -924,30 +999,13 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                         cursor: (customer.status !== '접수' && !isEditing) ? 'not-allowed' : 'pointer'
                                     }}
                                 >
-                                    {isEditing ? (
+                                    {customer.status === '접수' || isEditing ? (
                                         <>
                                             <option value="접수">접수 (신용조회 전)</option>
                                             <option value="신용동의 완료">신용동의 완료</option>
-                                            <option value="1차승인(추가 서류 등록 必)">1차승인(추가 서류 등록 必)</option>
-                                            <option value="1차서류 등록완료">1차서류 등록완료</option>
-                                            <option value="최종승인(시공계약서 등록 必)">최종승인(시공계약서 등록 必)</option>
-                                            <option value="최종서류 등록완료">최종서류 등록완료</option>
-                                            <option value="해피콜 대기">해피콜 대기</option>
-                                            <option value="완료">완료</option>
-                                            <option value="거절">거절</option>
-                                            <option value="취소">취소</option>
                                         </>
                                     ) : (
-                                        <>
-                                            {customer.status === '접수' ? (
-                                                <>
-                                                    <option value="접수">접수 (신용조회 전)</option>
-                                                    <option value="신용동의 완료">신용동의 완료</option>
-                                                </>
-                                            ) : (
-                                                <option value={customer.status}>{customer.status}</option>
-                                            )}
-                                        </>
+                                        <option value={customer.status}>{customer.status}</option>
                                     )}
                                 </select>
                                 {customer.status !== '접수' && !isEditing && (
@@ -1091,6 +1149,23 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                     </button>
                 </div>
             </div>
+
+            {isAddressOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 3000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div style={{ width: '500px', background: 'white', borderRadius: '1rem', overflow: 'hidden' }}>
+                        <div style={{ padding: '1rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
+                            <h3 style={{ fontWeight: 800 }}>주소 검색</h3>
+                            <button onClick={() => setIsAddressOpen(false)}>&times;</button>
+                        </div>
+                        <DaumPostcodeEmbed
+                            onComplete={(data) => {
+                                setEditData({ ...editData, address: data.address });
+                                setIsAddressOpen(false);
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -308,12 +308,17 @@ function AdminCustomerListContent() {
                 // ... (rest of the mapping logic remains same)
                 const mappedData = data.map((item: any) => {
                     const docsJson = item['documents'] || item['서류'] || item['서류관리'] || item['서류 JSON'] || item['서류JSON'];
+                    const birthDateRaw = item['생년월일'] || '-';
+                    const birthDate = (birthDateRaw.toString().includes('T'))
+                        ? birthDateRaw.toString().split('T')[0]
+                        : birthDateRaw;
+
                     return {
                         id: item['고객번호'] || item['고객 번호'] || item.ID || item.id || '-',
                         date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
                         name: item['신청자명'] || '이름 없음',
                         phone: item['연락처'] || '-',
-                        birthDate: item['생년월일'] || '-',
+                        birthDate: birthDate,
                         address: item['주소'] || '-',
                         amount: item['최종 견적가'] || item['견적금액'] || '0',
                         months: item['구독기간'] || '-',
