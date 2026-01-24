@@ -141,7 +141,7 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
 
     return (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000, padding: '1rem' }} onClick={onClose}>
-            <div style={{ background: '#0f172a', width: '750px', maxWidth: '100%', borderRadius: '1.5rem', border: '1px solid #1e293b', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+            <div style={{ background: '#0f172a', width: '800px', maxWidth: '100%', borderRadius: '1.5rem', border: '1px solid #1e293b', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
                 <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>고객 심사 상세</h2>
@@ -202,19 +202,19 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
 
                                         return (
                                             <div key={doc} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: file ? 'rgba(16, 185, 129, 0.05)' : '#1e293b', borderRadius: '0.5rem', border: '1px solid', borderColor: file ? 'rgba(16, 185, 129, 0.2)' : '#334155' }}>
-                                                <span style={{ fontSize: '0.75rem', color: file ? '#10b981' : '#94a3b8' }}>
+                                                <span style={{ fontSize: '0.75rem', color: file ? '#10b981' : '#94a3b8', flex: 1, marginRight: '0.5rem' }}>
                                                     {doc} {isStrictRequired ? (
-                                                        <span style={{ color: '#ef4444', fontSize: '0.65rem' }}>(필수)</span>
+                                                        <span style={{ color: '#ef4444', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>(필수)</span>
                                                     ) : isCoRequired ? (
-                                                        <span style={{ color: '#fbbf24', fontSize: '0.65rem' }}>(택1 필수)</span>
+                                                        <span style={{ color: '#fbbf24', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>(택1 필수)</span>
                                                     ) : (
-                                                        <span style={{ color: '#64748b', fontSize: '0.65rem' }}>(선택)</span>
+                                                        <span style={{ color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>(선택)</span>
                                                     )}
                                                 </span>
                                                 {file?.url ? (
-                                                    <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, textDecoration: 'none' }}>파일보기</a>
+                                                    <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>파일보기</a>
                                                 ) : (
-                                                    <span style={{ fontSize: '0.7rem', color: '#475569' }}>미등록</span>
+                                                    <span style={{ fontSize: '0.7rem', color: '#475569', whiteSpace: 'nowrap' }}>미등록</span>
                                                 )}
                                             </div>
                                         );

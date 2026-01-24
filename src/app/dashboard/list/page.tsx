@@ -539,7 +539,8 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
         amount: customer.amount,
         address: customer.address,
         months: customer.months,
-        transferDate: customer.transferDate
+        transferDate: customer.transferDate,
+        birthDate: customer.birthDate
     });
     const [deleting, setDeleting] = useState(false);
     const [isAddressOpen, setIsAddressOpen] = useState(false);
@@ -804,7 +805,8 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                     amount: editData.amount.toString().replace(/,/g, ''),
                     address: editData.address,
                     months: editData.months,
-                    transferDate: editData.transferDate
+                    transferDate: editData.transferDate,
+                    birthDate: editData.birthDate
                 })
             });
 
@@ -819,7 +821,8 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                     amount: editData.amount,
                     address: editData.address,
                     months: editData.months,
-                    transferDate: editData.transferDate
+                    transferDate: editData.transferDate,
+                    birthDate: editData.birthDate
                 });
                 if (finalStatus !== status) {
                     const message = finalStatus.includes('서류 등록완료')
@@ -910,7 +913,16 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                             </div>
                             <div>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>생년월일</p>
-                                <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{customer.birthDate}</p>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={editData.birthDate}
+                                        onChange={(e) => setEditData({ ...editData, birthDate: e.target.value })}
+                                        style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
+                                    />
+                                ) : (
+                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.birthDate}</p>
+                                )}
                             </div>
                             <div>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>견적 금액</p>
@@ -937,10 +949,9 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                         <option value="48">48개월</option>
                                         <option value="36">36개월</option>
                                         <option value="24">24개월</option>
-                                        <option value="12">12개월</option>
                                     </select>
                                 ) : (
-                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.months}개월</p>
+                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.months}{editData.months !== '-' ? '개월' : ''}</p>
                                 )}
                             </div>
                             <div>
@@ -958,7 +969,7 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                         <option value="25">매월 25일</option>
                                     </select>
                                 ) : (
-                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>매월 {editData.transferDate}일</p>
+                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.transferDate !== '-' ? `매월 ${editData.transferDate}일` : '-'}</p>
                                 )}
                             </div>
                             <div style={{ gridColumn: 'span 2' }}>
