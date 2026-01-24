@@ -429,14 +429,17 @@ export default function Dashboard() {
                     `}</style>
 
                     <div className="mobile-scroll">
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '900px' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1200px' }}>
                             <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem' }}>
                                 <tr>
                                     <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '120px' }}>신청일</th>
                                     <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '100px' }}>고객명</th>
                                     <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '130px' }}>연락처</th>
+                                    <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '110px' }}>생년월일</th>
                                     <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap' }}>주소</th>
                                     <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '140px' }}>견적 금액</th>
+                                    <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '100px' }}>구독 기간</th>
+                                    <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '110px' }}>이체일</th>
                                     <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '120px' }}>상태</th>
                                     <th style={{ padding: '0.875rem 1rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', width: '150px' }}>비고</th>
                                 </tr>
@@ -444,7 +447,7 @@ export default function Dashboard() {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={7} style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem' }}>
+                                        <td colSpan={10} style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem' }}>
                                             데이터를 불러오는 중입니다...
                                         </td>
                                     </tr>
@@ -461,10 +464,13 @@ export default function Dashboard() {
                                         }}
                                     >
                                         <td style={{ padding: '0.75rem 1rem', color: '#888' }}>{app.date}</td>
-                                        <td style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>{app.name}</td>
+                                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700 }}>{app.name}</td>
                                         <td style={{ padding: '0.75rem 1rem', color: '#555' }}>{app.phone}</td>
-                                        <td style={{ padding: '0.75rem 1rem', color: '#666', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{app.address}</td>
-                                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500 }}>{app.amount}원</td>
+                                        <td style={{ padding: '0.75rem 1rem', color: '#666' }}>{app.birthDate}</td>
+                                        <td style={{ padding: '0.75rem 1rem', color: '#666', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{app.address}</td>
+                                        <td style={{ padding: '0.75rem 1rem', fontWeight: 800, color: 'var(--primary)' }}>{app.amount}원</td>
+                                        <td style={{ padding: '0.75rem 1rem', color: '#555' }}>{app.months}{app.months !== '-' ? '개월' : ''}</td>
+                                        <td style={{ padding: '0.75rem 1rem', color: '#555' }}>{app.transferDate !== '-' ? `매월 ${app.transferDate}일` : '-'}</td>
                                         <td style={{ padding: '0.75rem 1rem' }}>
                                             {getStatusBadge(app.status)}
                                         </td>
@@ -474,7 +480,7 @@ export default function Dashboard() {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem' }}>
+                                        <td colSpan={10} style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem' }}>
                                             해당 상태의 신청 내역이 없습니다.
                                         </td>
                                     </tr>
