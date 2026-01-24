@@ -28,8 +28,11 @@ interface Customer {
     date: string;
     name: string;
     phone: string;
+    birthDate: string;
     address: string;
     amount: string;
+    months: string;
+    transferDate: string;
     status: Status;
     partnerName: string;
     remarks?: string;
@@ -86,13 +89,37 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
     const handleSave = async () => {
         setSaving(true);
         try {
+            let finalStatus = status;
+            const alwaysRequired = ['신분증사본', '통장사본(자동이체)', '최종 견적서'];
+            const conditionalRequired = ['부동산 등기부 등본(원본)', '부동산 매매 계약서 사본(등기 불가일 경우)'];
+
+            const isFirstRoundComplete = alwaysRequired.every(r => customer.documents?.[r]) && conditionalRequired.some(r => customer.documents?.[r]);
+
+            if (finalStatus === '1차서류 등록완료') {
+                if (!isFirstRoundComplete) {
+                    finalStatus = '1차승인(추가 서류 등록 必)';
+                }
+            } else if (finalStatus === '1차승인(추가 서류 등록 必)' || finalStatus === '신용동의 완료') {
+                if (isFirstRoundComplete) {
+                    finalStatus = '1차서류 등록완료';
+                }
+            } else if (finalStatus === '최종서류 등록완료') {
+                if (!customer.documents?.['시공 계약서']) {
+                    finalStatus = '최종승인(시공계약서 등록 必)';
+                }
+            } else if (finalStatus === '최종승인(시공계약서 등록 必)') {
+                if (customer.documents?.['시공 계약서']) {
+                    finalStatus = '최종서류 등록완료';
+                }
+            }
+
             const response = await fetch('/api/proxy', {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'update',
                     type: 'customers',
                     id: customer.id,
-                    status: status,
+                    status: finalStatus,
                     remarks: remarks,
                     documents: JSON.stringify(customer.documents || {})
                 })
@@ -136,10 +163,26 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
                             </select>
                         </div>
                         <div>
+                            <label style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>연락처</label>
+                            <div style={{ padding: '0.75rem', borderRadius: '0.75rem', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}>{customer.phone}</div>
+                        </div>
+                        <div>
+                            <label style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>생년월일</label>
+                            <div style={{ padding: '0.75rem', borderRadius: '0.75rem', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}>{customer.birthDate}</div>
+                        </div>
+                        <div>
                             <label style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>견적 금액</label>
                             <div style={{ padding: '0.75rem', borderRadius: '0.75rem', background: '#020617', border: '1px solid #1e293b', color: '#38bdf8', fontWeight: 700 }}>
                                 {Number(customer.amount.toString().replace(/,/g, '')).toLocaleString()}원
                             </div>
+                        </div>
+                        <div>
+                            <label style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>구독 기간 / 이체일</label>
+                            <div style={{ padding: '0.75rem', borderRadius: '0.75rem', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}>{customer.months}개월 / 매월 {customer.transferDate}일</div>
+                        </div>
+                        <div>
+                            <label style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>시공 주소</label>
+                            <div style={{ padding: '0.75rem', borderRadius: '0.75rem', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem' }}>{customer.address}</div>
                         </div>
                     </div>
 
@@ -154,11 +197,19 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                     {firstRoundDocs.map((doc, idx) => {
                                         const file = customer.documents?.[doc];
-                                        const isRequired = [0, 1, 2, 5].includes(idx);
+                                        const isStrictRequired = [0, 1, 5].includes(idx);
+                                        const isCoRequired = [2, 3].includes(idx);
+
                                         return (
                                             <div key={doc} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: file ? 'rgba(16, 185, 129, 0.05)' : '#1e293b', borderRadius: '0.5rem', border: '1px solid', borderColor: file ? 'rgba(16, 185, 129, 0.2)' : '#334155' }}>
                                                 <span style={{ fontSize: '0.75rem', color: file ? '#10b981' : '#94a3b8' }}>
-                                                    {doc} {isRequired ? <span style={{ color: '#ef4444', fontSize: '0.65rem' }}>(필수)</span> : <span style={{ color: '#64748b', fontSize: '0.65rem' }}>(선택)</span>}
+                                                    {doc} {isStrictRequired ? (
+                                                        <span style={{ color: '#ef4444', fontSize: '0.65rem' }}>(필수)</span>
+                                                    ) : isCoRequired ? (
+                                                        <span style={{ color: '#fbbf24', fontSize: '0.65rem' }}>(택1 필수)</span>
+                                                    ) : (
+                                                        <span style={{ color: '#64748b', fontSize: '0.65rem' }}>(선택)</span>
+                                                    )}
                                                 </span>
                                                 {file?.url ? (
                                                     <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, textDecoration: 'none' }}>파일보기</a>
@@ -262,8 +313,11 @@ function AdminCustomerListContent() {
                         date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
                         name: item['신청자명'] || '이름 없음',
                         phone: item['연락처'] || '-',
+                        birthDate: item['생년월일'] || '-',
                         address: item['주소'] || '-',
                         amount: item['최종 견적가'] || item['견적금액'] || '0',
+                        months: item['구독기간'] || '-',
+                        transferDate: item['이체희망일'] || '-',
                         status: (item['상태'] || '접수') as Status,
                         partnerName: item['파트너명'] || '미지정',
                         remarks: item['비고'] || '',
@@ -499,13 +553,17 @@ function AdminCustomerListContent() {
                                     <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>파트너사</th>
                                     <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>고객명</th>
                                     <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>연락처</th>
+                                    <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>생년월일</th>
+                                    <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>주소</th>
                                     <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>견적가</th>
+                                    <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>구독기간</th>
+                                    <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>이체일</th>
                                     <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>상태</th>
                                 </tr>
                             </thead>
                             <tbody style={{ color: '#cbd5e1', fontSize: '0.875rem' }}>
                                 {loading ? (
-                                    <tr><td colSpan={6} style={{ padding: '4rem', textAlign: 'center' }}>데이터를 불러오는 중...</td></tr>
+                                    <tr><td colSpan={10} style={{ padding: '4rem', textAlign: 'center' }}>데이터를 불러오는 중...</td></tr>
                                 ) : filteredCustomers.length > 0 ? filteredCustomers.map((c, i) => {
                                     const styles = getStatusBadgeStyles(c.status);
                                     return (
@@ -519,7 +577,11 @@ function AdminCustomerListContent() {
                                             <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: '#38bdf8', whiteSpace: 'nowrap' }}>{c.partnerName}</td>
                                             <td style={{ padding: '1rem 1.5rem', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{c.name}</td>
                                             <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>{c.phone}</td>
+                                            <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>{c.birthDate}</td>
+                                            <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.address}</td>
                                             <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>{Number(c.amount.toString().replace(/,/g, '')).toLocaleString()}원</td>
+                                            <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>{c.months}개월</td>
+                                            <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>매월 {c.transferDate}일</td>
                                             <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
                                                 <span style={{
                                                     padding: '0.3rem 0.75rem',
@@ -536,7 +598,7 @@ function AdminCustomerListContent() {
                                         </tr>
                                     );
                                 }) : (
-                                    <tr><td colSpan={6} style={{ padding: '4rem', textAlign: 'center', color: '#64748b' }}>검색 결과가 없습니다.</td></tr>
+                                    <tr><td colSpan={10} style={{ padding: '4rem', textAlign: 'center', color: '#64748b' }}>검색 결과가 없습니다.</td></tr>
                                 )}
                             </tbody>
                         </table>

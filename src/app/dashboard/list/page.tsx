@@ -27,8 +27,11 @@ interface Customer {
     id: string | number;
     name: string;
     phone: string;
+    birthDate: string;
     address: string;
     amount: string;
+    months: string;
+    transferDate: string;
     date: string;
     status: Status;
     remarks: string;
@@ -94,8 +97,11 @@ export default function CustomerList() {
                         id: item['고객번호'] || item['고객 번호'] || item.ID || item.id || Math.random(),
                         name: item['신청자명'] || '이름 없음',
                         phone: item['연락처'] || '-',
+                        birthDate: item['생년월일'] || '-',
                         address: item['주소'] || '-',
                         amount: amount,
+                        months: item['구독기간'] || '-',
+                        transferDate: item['이체희망일'] || '-',
                         date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
                         status: (item['상태'] || '접수') as Status,
                         remarks: item['비고'] || '',
@@ -429,8 +435,11 @@ export default function CustomerList() {
                                     <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>신청일</th>
                                     <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>고객명</th>
                                     <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>연락처</th>
+                                    <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>생년월일</th>
                                     <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>주소</th>
                                     <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>견적 금액</th>
+                                    <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>구독 기간</th>
+                                    <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>이체일</th>
                                     <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>상태</th>
                                     <th style={{ padding: '1rem', fontWeight: 700, color: '#475569' }}>비고</th>
                                 </tr>
@@ -438,7 +447,7 @@ export default function CustomerList() {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={7} style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>데이터를 불러오는 중입니다...</td>
+                                        <td colSpan={10} style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>데이터를 불러오는 중입니다...</td>
                                     </tr>
                                 ) : filteredCustomers.length > 0 ? (
                                     filteredCustomers.map((app, i) => (
@@ -456,22 +465,25 @@ export default function CustomerList() {
                                             <td style={{ padding: '1rem', color: '#64748b' }}>{app.date}</td>
                                             <td style={{ padding: '1rem', fontWeight: 700 }}>{app.name}</td>
                                             <td style={{ padding: '1rem', color: '#475569' }}>{app.phone}</td>
+                                            <td style={{ padding: '1rem', color: '#64748b' }}>{app.birthDate}</td>
                                             <td style={{
                                                 padding: '1rem',
                                                 color: '#64748b',
-                                                maxWidth: '300px',
+                                                maxWidth: '200px',
                                                 overflow: 'hidden',
                                                 textOverflow: 'ellipsis',
                                                 whiteSpace: 'nowrap'
                                             }}>{app.address}</td>
                                             <td style={{ padding: '1rem', fontWeight: 700, color: 'var(--primary)' }}>{app.amount}원</td>
+                                            <td style={{ padding: '1rem', color: '#64748b' }}>{app.months}{app.months !== '-' ? '개월' : ''}</td>
+                                            <td style={{ padding: '1rem', color: '#64748b' }}>매월 {app.transferDate}{app.transferDate !== '-' ? '일' : ''}</td>
                                             <td style={{ padding: '1rem' }}>{getStatusBadge(app.status)}</td>
                                             <td style={{ padding: '1rem', color: '#94a3b8' }}>{app.remarks || '-'}</td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={7} style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>검색 결과가 없습니다.</td>
+                                        <td colSpan={10} style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>검색 결과가 없습니다.</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -858,6 +870,10 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                 )}
                             </div>
                             <div>
+                                <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>생년월일</p>
+                                <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{customer.birthDate}</p>
+                            </div>
+                            <div>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>견적 금액</p>
                                 {isEditing ? (
                                     <input
@@ -871,6 +887,14 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                 )}
                             </div>
                             <div>
+                                <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>구독 기간</p>
+                                <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{customer.months}개월</p>
+                            </div>
+                            <div>
+                                <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>이체 희망일</p>
+                                <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>매월 {customer.transferDate}일</p>
+                            </div>
+                            <div style={{ gridColumn: 'span 2' }}>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>시공 주소</p>
                                 {isEditing ? (
                                     <input
