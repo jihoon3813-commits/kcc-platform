@@ -616,8 +616,13 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
 
             // Auto transition logic
             if (status === '1차승인(추가 서류 등록 必)' || status === '신용동의 완료') {
-                const required = ['신분증사본', '통장사본(자동이체)', '부동산 등기부 등본(원본)', '최종 견적서'];
-                if (required.every(r => updatedDocs[r])) {
+                const alwaysRequired = ['신분증사본', '통장사본(자동이체)', '최종 견적서'];
+                const conditionalRequired = ['부동산 등기부 등본(원본)', '부동산 매매 계약서 사본(등기 불가일 경우)'];
+
+                const hasAlwaysRequired = alwaysRequired.every(r => updatedDocs[r]);
+                const hasConditionalRequired = conditionalRequired.some(r => updatedDocs[r]);
+
+                if (hasAlwaysRequired && hasConditionalRequired) {
                     const nextStatus = '1차서류 등록완료';
                     setStatus(nextStatus);
 
@@ -714,14 +719,17 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
         setSaving(true);
         try {
             let finalStatus = status;
-            const required1 = ['신분증사본', '통장사본(자동이체)', '부동산 등기부 등본(원본)', '최종 견적서'];
+            const alwaysRequired = ['신분증사본', '통장사본(자동이체)', '최종 견적서'];
+            const conditionalRequired = ['부동산 등기부 등본(원본)', '부동산 매매 계약서 사본(등기 불가일 경우)'];
+
+            const isFirstRoundComplete = alwaysRequired.every(r => documents[r]) && conditionalRequired.some(r => documents[r]);
 
             if (finalStatus === '1차서류 등록완료') {
-                if (!required1.every(r => documents[r])) {
+                if (!isFirstRoundComplete) {
                     finalStatus = '1차승인(추가 서류 등록 必)';
                 }
             } else if (finalStatus === '1차승인(추가 서류 등록 必)' || finalStatus === '신용동의 완료') {
-                if (required1.every(r => documents[r])) {
+                if (isFirstRoundComplete) {
                     finalStatus = '1차서류 등록완료';
                 }
             } else if (finalStatus === '최종서류 등록완료') {
@@ -927,11 +935,21 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                             <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem', paddingBottom: '0.4rem', borderBottom: '2px solid #3B82F6' }}>1차 심사 서류 (신용 통과 후)</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                 {firstRoundDocs.map((doc, idx) => {
-                                    const isRequired = [0, 1, 2, 5].includes(idx);
+                                    // 0: 신분증, 1: 통장사본, 5: 최종견적서 (필수)
+                                    // 2: 부동산등기, 3: 매매계약서 (택1 필수)
+                                    const isStrictRequired = [0, 1, 5].includes(idx);
+                                    const isCoRequired = [2, 3].includes(idx);
+
                                     return (
                                         <div key={doc} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', background: '#F9FAFB', borderRadius: '0.5rem', border: '1px solid #f1f5f9' }}>
                                             <span style={{ fontSize: '0.8rem', color: '#334155' }}>
-                                                {doc} {isRequired ? <span style={{ color: '#EF4444', fontSize: '0.7rem', fontWeight: 600 }}>(필수)</span> : <span style={{ color: '#94A3B8', fontSize: '0.7rem' }}>(선택)</span>}
+                                                {doc} {isStrictRequired ? (
+                                                    <span style={{ color: '#EF4444', fontSize: '0.7rem', fontWeight: 600 }}>(필수)</span>
+                                                ) : isCoRequired ? (
+                                                    <span style={{ color: '#F59E0B', fontSize: '0.7rem', fontWeight: 600 }}>(택1 필수)</span>
+                                                ) : (
+                                                    <span style={{ color: '#94A3B8', fontSize: '0.7rem' }}>(선택)</span>
+                                                )}
                                             </span>
                                             {documents[doc] ? (
                                                 <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
