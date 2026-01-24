@@ -811,6 +811,11 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
             });
 
             if (response.ok) {
+                const resData = await response.json();
+                if (resData.result === 'error') {
+                    throw new Error(resData.message || 'Back-end save failed');
+                }
+
                 onUpdate({
                     ...customer,
                     status: finalStatus,

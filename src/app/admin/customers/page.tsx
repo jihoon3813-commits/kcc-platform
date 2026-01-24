@@ -126,6 +126,10 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate }: { customer: Custom
             });
 
             if (response.ok) {
+                const resData = await response.json();
+                if (resData.result === 'error') {
+                    throw new Error(resData.message || 'Back-end save failed');
+                }
                 alert('변경사항이 저장되었습니다.');
                 onUpdate();
                 onClose();
