@@ -311,25 +311,36 @@ function AdminCustomerListContent() {
             if (Array.isArray(data)) {
                 // ... (rest of the mapping logic remains same)
                 const mappedData = data.map((item: any) => {
-                    const docsJson = item['documents'] || item['서류'] || item['서류관리'] || item['서류 JSON'] || item['서류JSON'];
-                    const birthDateRaw = item['생년월일'] || '-';
+                    const findVal = (keywords: string[]) => {
+                        const keys = Object.keys(item);
+                        for (const k of keys) {
+                            const normalizedK = k.toLowerCase().replace(/\s/g, '');
+                            for (const key of keywords) {
+                                if (normalizedK.includes(key.toLowerCase().replace(/\s/g, ''))) return item[k];
+                            }
+                        }
+                        return null;
+                    };
+
+                    const docsJson = findVal(['documents', '서류', '서류관리', '서류JSON']);
+                    const birthDateRaw = findVal(['생년월일', 'birthDate']) || '-';
                     const birthDate = (birthDateRaw.toString().includes('T'))
                         ? birthDateRaw.toString().split('T')[0]
                         : birthDateRaw;
 
                     return {
-                        id: item['고객번호'] || item['고객 번호'] || item.ID || item.id || '-',
-                        date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
-                        name: item['신청자명'] || '이름 없음',
-                        phone: item['연락처'] || '-',
+                        id: findVal(['고객번호', 'ID', 'id']) || '-',
+                        date: findVal(['접수일', 'date']) ? findVal(['접수일', 'date']).toString().split('T')[0] : '-',
+                        name: findVal(['신청자명', '이름', 'name']) || '이름 없음',
+                        phone: findVal(['연락처', 'phone']) || '-',
                         birthDate: birthDate,
-                        address: item['주소'] || '-',
-                        amount: item['최종 견적가'] || item['견적금액'] || '0',
-                        months: item['구독기간'] || item['구독 기간'] || item['구독개월'] || item['구독 개월'] || '-',
-                        transferDate: item['이체희망일'] || item['이체 희망일'] || item['이체일'] || item['이체 희망일 '] || '-',
-                        status: (item['상태'] || '접수') as Status,
-                        partnerName: item['파트너명'] || '미지정',
-                        remarks: item['비고'] || '',
+                        address: findVal(['주소', 'address']) || '-',
+                        amount: findVal(['최종견적가', '견적금액', 'amount']) || '0',
+                        months: findVal(['구독기간', '구독개월', 'months']) || '-',
+                        transferDate: findVal(['이체희망일', '이체일', 'transferDate']) || '-',
+                        status: (findVal(['상태', 'status']) || '접수') as Status,
+                        partnerName: findVal(['파트너명', 'partnerName']) || '미지정',
+                        remarks: findVal(['비고', 'remarks']) || '',
                         documents: docsJson ? (typeof docsJson === 'string' ? JSON.parse(docsJson) : docsJson) : {}
                     };
                 });

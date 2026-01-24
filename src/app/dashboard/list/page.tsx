@@ -89,28 +89,39 @@ export default function CustomerList() {
                 });
 
                 const mappedData = filteredByPartner.map((item: any) => {
-                    const rawAmount = item['최종 견적가'] || item['견적금액'] || '0';
+                    const findVal = (keywords: string[]) => {
+                        const keys = Object.keys(item);
+                        for (const k of keys) {
+                            const normalizedK = k.toLowerCase().replace(/\s/g, '');
+                            for (const key of keywords) {
+                                if (normalizedK.includes(key.toLowerCase().replace(/\s/g, ''))) return item[k];
+                            }
+                        }
+                        return null;
+                    };
+
+                    const rawAmount = findVal(['최종견적가', '견적금액', 'amount']) || '0';
                     const sanitizedAmount = rawAmount.toString().replace(/,/g, '');
                     const amount = isNaN(Number(sanitizedAmount)) ? '0' : Number(sanitizedAmount).toLocaleString();
 
-                    const docsJson = item['documents'] || item['서류'] || item['서류관리'] || item['서류 JSON'] || item['서류JSON'];
-                    const birthDateRaw = item['생년월일'] || '-';
+                    const docsJson = findVal(['documents', '서류', '서류관리', '서류JSON']);
+                    const birthDateRaw = findVal(['생년월일', 'birthDate']) || '-';
                     const birthDate = (birthDateRaw.toString().includes('T'))
                         ? birthDateRaw.toString().split('T')[0]
                         : birthDateRaw;
 
                     return {
-                        id: item['고객번호'] || item['고객 번호'] || item.ID || item.id || Math.random(),
-                        name: item['신청자명'] || '이름 없음',
-                        phone: item['연락처'] || '-',
+                        id: findVal(['고객번호', 'ID', 'id']) || Math.random(),
+                        name: findVal(['신청자명', '이름', 'name']) || '이름 없음',
+                        phone: findVal(['연락처', 'phone']) || '-',
                         birthDate: birthDate,
-                        address: item['주소'] || '-',
+                        address: findVal(['주소', 'address']) || '-',
                         amount: amount,
-                        months: item['구독기간'] || item['구독 기간'] || item['구독개월'] || item['구독 개월'] || '-',
-                        transferDate: item['이체희망일'] || item['이체 희망일'] || item['이체일'] || item['이체 희망일 '] || '-',
-                        date: item['접수일'] ? item['접수일'].toString().split('T')[0] : '-',
-                        status: (item['상태'] || '접수') as Status,
-                        remarks: item['비고'] || '',
+                        months: findVal(['구독기간', '구독개월', 'months']) || '-',
+                        transferDate: findVal(['이체희망일', '이체일', 'transferDate']) || '-',
+                        date: findVal(['접수일', 'date']) ? findVal(['접수일', 'date']).toString().split('T')[0] : '-',
+                        status: (findVal(['상태', 'status']) || '접수') as Status,
+                        remarks: findVal(['비고', 'remarks']) || '',
                         documents: docsJson ? (typeof docsJson === 'string' ? JSON.parse(docsJson) : docsJson) : {}
                     };
                 });
