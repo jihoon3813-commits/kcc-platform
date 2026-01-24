@@ -513,6 +513,16 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState<string | null>(null);
 
+    // Editing mode state
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({
+        name: customer.name,
+        phone: customer.phone,
+        amount: customer.amount,
+        address: customer.address
+    });
+    const [deleting, setDeleting] = useState(false);
+
     const firstRoundDocs = [
         '신분증사본', '통장사본(자동이체)', '부동산 등기부 등본(원본)',
         '부동산 매매 계약서 사본(등기 불가일 경우)', '가족관계 증명서(등기가 가족 명의일 경우)', '최종 견적서'
@@ -575,8 +585,8 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                 base64 = await base64Promise;
             }
 
-            const sanitizedPhone = (customer.phone || '').replace(/[^0-9]/g, '');
-            const fileName = `${customer.date}_${customer.name}_${sanitizedPhone}_${docName}`;
+            const sanitizedPhone = (editData.phone || '').replace(/[^0-9]/g, '');
+            const fileName = `${customer.date}_${editData.name}_${sanitizedPhone}_${docName}`;
 
             const response = await fetch('/api/proxy', {
                 method: 'POST',
@@ -620,10 +630,14 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                             id: customer.id,
                             status: nextStatus,
                             remarks: remarks,
-                            documents: JSON.stringify(updatedDocs)
+                            documents: JSON.stringify(updatedDocs),
+                            customerName: editData.name,
+                            phone: editData.phone,
+                            amount: editData.amount.replace(/,/g, ''),
+                            address: editData.address
                         })
                     });
-                    onUpdate({ ...customer, status: nextStatus, remarks, documents: updatedDocs });
+                    onUpdate({ ...customer, status: nextStatus, remarks, documents: updatedDocs, name: editData.name, phone: editData.phone, amount: editData.amount, address: editData.address });
                     alert('필수 서류가 모두 등록되어 "1차서류 등록완료"로 자동 변경되었습니다.');
                     onClose();
                     return;
@@ -641,10 +655,14 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                             id: customer.id,
                             status: nextStatus,
                             remarks: remarks,
-                            documents: JSON.stringify(updatedDocs)
+                            documents: JSON.stringify(updatedDocs),
+                            customerName: editData.name,
+                            phone: editData.phone,
+                            amount: editData.amount.replace(/,/g, ''),
+                            address: editData.address
                         })
                     });
-                    onUpdate({ ...customer, status: nextStatus, remarks, documents: updatedDocs });
+                    onUpdate({ ...customer, status: nextStatus, remarks, documents: updatedDocs, name: editData.name, phone: editData.phone, amount: editData.amount, address: editData.address });
                     alert('시공 계약서가 등록되어 "최종서류 등록완료"로 자동 변경되었습니다.');
                     onClose();
                     return;
@@ -662,6 +680,34 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
         const updatedDocs = { ...documents };
         delete updatedDocs[docName];
         setDocuments(updatedDocs);
+    };
+
+    const handleDelete = async () => {
+        if (!confirm('정말로 이 고객 정보를 삭제하시겠습니까? 삭제된 정보는 복구할 수 없습니다.')) return;
+
+        setDeleting(true);
+        try {
+            const response = await fetch('/api/proxy', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'deleteCustomer', // Based on the requested naming pattern
+                    type: isGuest ? 'guest_customers' : 'customers',
+                    id: customer.id
+                })
+            });
+
+            if (response.ok) {
+                alert('고객 정보가 삭제되었습니다.');
+                window.location.reload(); // Quick way to refresh list
+            } else {
+                throw new Error('Delete failed');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('삭제에 실패했습니다.');
+        } finally {
+            setDeleting(false);
+        }
     };
 
     const handleSave = async () => {
@@ -696,12 +742,26 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                     id: customer.id,
                     status: finalStatus,
                     remarks: remarks,
-                    documents: JSON.stringify(documents)
+                    documents: JSON.stringify(documents),
+                    // Add edited basic info
+                    customerName: editData.name,
+                    phone: editData.phone,
+                    amount: editData.amount.toString().replace(/,/g, ''),
+                    address: editData.address
                 })
             });
 
             if (response.ok) {
-                onUpdate({ ...customer, status: finalStatus, remarks, documents });
+                onUpdate({
+                    ...customer,
+                    status: finalStatus,
+                    remarks,
+                    documents,
+                    name: editData.name,
+                    phone: editData.phone,
+                    amount: editData.amount,
+                    address: editData.address
+                });
                 if (finalStatus !== status) {
                     const message = finalStatus.includes('서류 등록완료')
                         ? `필수 서류 등록이 확인되어 '${finalStatus}' 상태로 변경 저장되었습니다.`
@@ -736,9 +796,25 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                 <div style={{ padding: '1.5rem', background: '#f8fafc', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>고객 상세 정보</h2>
-                        <p style={{ fontSize: '0.875rem', color: '#64748b' }}>{customer.name} 고객님의 심사 서류 및 현황입니다.</p>
+                        <p style={{ fontSize: '0.875rem', color: '#64748b' }}>{editData.name} 고객님의 심사 서류 및 현황입니다.</p>
                     </div>
-                    <button onClick={onClose} style={{ fontSize: '1.5rem', color: '#94a3b8' }}>&times;</button>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                        <button
+                            onClick={() => setIsEditing(!isEditing)}
+                            style={{
+                                padding: '0.4rem 0.8rem',
+                                borderRadius: '0.4rem',
+                                border: '1px solid #cbd5e1',
+                                background: isEditing ? '#e2e8f0' : 'white',
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {isEditing ? '수정 취소' : '기본정보 수정'}
+                        </button>
+                        <button onClick={onClose} style={{ fontSize: '1.5rem', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer' }}>&times;</button>
+                    </div>
                 </div>
 
                 {/* Modal Content */}
@@ -748,44 +824,92 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                         <h3 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1rem', color: '#1e293b', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>고객 기본 정보</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div>
+                                <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>고객명</p>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={editData.name}
+                                        onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                        style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
+                                    />
+                                ) : (
+                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.name}</p>
+                                )}
+                            </div>
+                            <div>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>연락처</p>
-                                <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{customer.phone}</p>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={editData.phone}
+                                        onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                                        style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
+                                    />
+                                ) : (
+                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.phone}</p>
+                                )}
                             </div>
                             <div>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>견적 금액</p>
-                                <p style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.9rem' }}>{customer.amount}원</p>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={editData.amount}
+                                        onChange={(e) => setEditData({ ...editData, amount: e.target.value })}
+                                        style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
+                                    />
+                                ) : (
+                                    <p style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.9rem' }}>{editData.amount}원</p>
+                                )}
                             </div>
-                            <div style={{ gridColumn: 'span 2' }}>
+                            <div>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>시공 주소</p>
-                                <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{customer.address}</p>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={editData.address}
+                                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                                        style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
+                                    />
+                                ) : (
+                                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{editData.address}</p>
+                                )}
                             </div>
                             <div style={{ gridColumn: 'span 2' }}>
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>진행 상태</p>
                                 <select
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value as Status)}
-                                    disabled={customer.status !== '접수'}
+                                    disabled={customer.status !== '접수' && !isEditing}
                                     style={{
                                         width: '100%',
                                         padding: '0.5rem',
                                         borderRadius: '0.5rem',
                                         border: '1px solid #cbd5e1',
                                         fontSize: '0.875rem',
-                                        background: customer.status !== '접수' ? '#f1f5f9' : 'white',
+                                        background: (customer.status !== '접수' && !isEditing) ? '#f1f5f9' : 'white',
                                         marginTop: '0.25rem',
-                                        cursor: customer.status !== '접수' ? 'not-allowed' : 'pointer'
+                                        cursor: (customer.status !== '접수' && !isEditing) ? 'not-allowed' : 'pointer'
                                     }}
                                 >
-                                    {customer.status === '접수' ? (
+                                    {(customer.status === '접수' || isEditing) ? (
                                         <>
                                             <option value="접수">접수 (신용조회 전)</option>
                                             <option value="신용동의 완료">신용동의 완료</option>
+                                            <option value="1차승인(추가 서류 등록 必)">1차승인(추가 서류 등록 必)</option>
+                                            <option value="1차서류 등록완료">1차서류 등록완료</option>
+                                            <option value="최종승인(시공계약서 등록 必)">최종승인(시공계약서 등록 必)</option>
+                                            <option value="최종서류 등록완료">최종서류 등록완료</option>
+                                            <option value="해피콜 대기">해피콜 대기</option>
+                                            <option value="완료">완료</option>
+                                            <option value="거절">거절</option>
+                                            <option value="취소">취소</option>
                                         </>
                                     ) : (
                                         <option value={customer.status}>{customer.status}</option>
                                     )}
                                 </select>
-                                {customer.status !== '접수' && (
+                                {customer.status !== '접수' && !isEditing && (
                                     <p style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.4rem' }}>
                                         * 이 단계의 상태는 서류 등록 시 자동 변경되거나 관리자에 의해 관리됩니다.
                                     </p>
@@ -890,15 +1014,25 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                     </div>
                 </div>
 
-                <div style={{ padding: '1.25rem', borderTop: '1px solid #eee', background: '#f8fafc', display: 'flex', gap: '1rem' }}>
+                <div style={{ padding: '1.25rem', borderTop: '1px solid #eee', background: '#f8fafc', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     <button
-                        style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, color: '#475569' }}
+                        style={{ padding: '0.75rem 1.5rem', borderRadius: '0.5rem', border: '1px solid #EF4444', background: 'white', fontWeight: 700, color: '#EF4444', fontSize: '0.875rem' }}
+                        onClick={handleDelete}
+                        disabled={deleting}
+                    >
+                        {deleting ? '삭제 중...' : '신청 정보 삭제'}
+                    </button>
+
+                    <div style={{ flex: 1 }}></div>
+
+                    <button
+                        style={{ padding: '0.75rem 1.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, color: '#475569' }}
                         onClick={onClose}
                     >
                         닫기
                     </button>
                     <button
-                        style={{ flex: 2, padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--primary)', fontWeight: 700, color: 'white', opacity: saving ? 0.7 : 1 }}
+                        style={{ padding: '0.75rem 2rem', borderRadius: '0.5rem', background: 'var(--primary)', fontWeight: 700, color: 'white', opacity: saving ? 0.7 : 1 }}
                         onClick={handleSave}
                         disabled={saving}
                     >
