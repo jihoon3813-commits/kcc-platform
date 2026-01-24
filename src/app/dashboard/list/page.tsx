@@ -900,7 +900,7 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                         cursor: (customer.status !== '접수' && !isEditing) ? 'not-allowed' : 'pointer'
                                     }}
                                 >
-                                    {(customer.status === '접수' || isEditing) ? (
+                                    {isEditing ? (
                                         <>
                                             <option value="접수">접수 (신용조회 전)</option>
                                             <option value="신용동의 완료">신용동의 완료</option>
@@ -914,7 +914,16 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                             <option value="취소">취소</option>
                                         </>
                                     ) : (
-                                        <option value={customer.status}>{customer.status}</option>
+                                        <>
+                                            {customer.status === '접수' ? (
+                                                <>
+                                                    <option value="접수">접수 (신용조회 전)</option>
+                                                    <option value="신용동의 완료">신용동의 완료</option>
+                                                </>
+                                            ) : (
+                                                <option value={customer.status}>{customer.status}</option>
+                                            )}
+                                        </>
                                     )}
                                 </select>
                                 {customer.status !== '접수' && !isEditing && (
