@@ -892,9 +892,20 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>연락처</p>
                                 {isEditing ? (
                                     <input
-                                        type="text"
+                                        type="tel"
+                                        inputMode="numeric"
+                                        maxLength={13}
                                         value={editData.phone}
-                                        onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^0-9]/g, '');
+                                            let formatted = val;
+                                            if (val.length > 3 && val.length <= 7) {
+                                                formatted = `${val.slice(0, 3)}-${val.slice(3)}`;
+                                            } else if (val.length > 7) {
+                                                formatted = `${val.slice(0, 3)}-${val.slice(3, 7)}-${val.slice(7, 11)}`;
+                                            }
+                                            setEditData({ ...editData, phone: formatted });
+                                        }}
                                         style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
                                     />
                                 ) : (
@@ -905,9 +916,21 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>생년월일</p>
                                 {isEditing ? (
                                     <input
-                                        type="text"
+                                        type="tel"
+                                        inputMode="numeric"
+                                        maxLength={10}
+                                        placeholder="YYYY-MM-DD"
                                         value={editData.birthDate}
-                                        onChange={(e) => setEditData({ ...editData, birthDate: e.target.value })}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^0-9]/g, '');
+                                            let formatted = val;
+                                            if (val.length > 4 && val.length <= 6) {
+                                                formatted = `${val.slice(0, 4)}-${val.slice(4)}`;
+                                            } else if (val.length > 6) {
+                                                formatted = `${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6, 8)}`;
+                                            }
+                                            setEditData({ ...editData, birthDate: formatted });
+                                        }}
                                         style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
                                     />
                                 ) : (
@@ -918,9 +941,14 @@ function CustomerDetailModal({ customer, isGuest, onClose, onUpdate }: { custome
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>견적 금액</p>
                                 {isEditing ? (
                                     <input
-                                        type="text"
+                                        type="tel"
+                                        inputMode="numeric"
                                         value={editData.amount}
-                                        onChange={(e) => setEditData({ ...editData, amount: e.target.value })}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^0-9]/g, '');
+                                            const formatted = val ? Number(val).toLocaleString() : '';
+                                            setEditData({ ...editData, amount: formatted });
+                                        }}
                                         style={{ width: '100%', padding: '0.4rem', border: '1px solid #cbd5e1', borderRadius: '0.3rem' }}
                                     />
                                 ) : (

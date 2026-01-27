@@ -55,11 +55,13 @@ export default function AdminSidebar() {
                 zIndex: 100
             }}>
                 <div style={{ padding: '2rem', borderBottom: '1px solid #1e293b' }}>
-                    <img
-                        src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/e840c9a46f66a.png"
-                        alt="KCC Logo"
-                        style={{ height: '24px', marginBottom: '1rem' }}
-                    />
+                    <Link href="/admin">
+                        <img
+                            src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/e840c9a46f66a.png"
+                            alt="KCC Logo"
+                            style={{ height: '24px', marginBottom: '1rem', cursor: 'pointer' }}
+                        />
+                    </Link>
                     <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#38bdf8' }}>ADMIN CONTROL</div>
                 </div>
 

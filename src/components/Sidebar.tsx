@@ -40,11 +40,13 @@ export default function Sidebar() {
             {/* Desktop Sidebar */}
             <aside className="sidebar-desktop desktop-only">
                 <div style={{ marginBottom: '3rem' }}>
-                    <img
-                        src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/e840c9a46f66a.png"
-                        alt="KCC Logo"
-                        style={{ height: '32px', objectFit: 'contain' }}
-                    />
+                    <Link href="/dashboard">
+                        <img
+                            src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/e840c9a46f66a.png"
+                            alt="KCC Logo"
+                            style={{ height: '32px', objectFit: 'contain', cursor: 'pointer' }}
+                        />
+                    </Link>
                 </div>
 
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
