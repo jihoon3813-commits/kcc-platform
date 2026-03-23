@@ -27,7 +27,7 @@ export default function PartnerManualPage() {
             actions: [
                 '1. [고객관리] 메뉴 우측 상단의 "고객 정보 등록" 버튼 클릭',
                 '2. 고객의 기본 정보(이름, 연락처, 주소 등) 및 시공 정보 입력',
-                '3. "구독 신청 생성" 버튼을 누르면 고객에게 안내 문자가 자동 발송됨'
+                '3. "고객정보 입력 및 문자발송" 버튼을 누르면 고객에게 안내 문자가 자동 발송됨'
             ],
             images: ['https://cdn.imweb.me/upload/S20250904697320f4fd9ed/431159892d2de.png']
         },
@@ -37,9 +37,9 @@ export default function PartnerManualPage() {
             actor: '고객',
             description: '신용조회 동의 및 필수 서류 등록',
             actions: [
-                '1. 수신된 카카오톡 알림톡/문자의 전용 링크 클릭',
+                '1. 수신된 문자의 전용 링크 클릭',
                 '2. 계약 내용 확인 및 신용조회 동의 진행',
-                '3. 필요 시 본인 인증 및 필수 서류 첨부'
+                '3. 신용조회 동의 후 필수 서류 첨부'
             ],
             images: ['https://cdn.imweb.me/upload/S20250904697320f4fd9ed/194d8c3c191f4.png']
         },
@@ -50,8 +50,8 @@ export default function PartnerManualPage() {
             description: '파트너 어드민에서 고객 선택 후 견적서 파일 첨부',
             actions: [
                 '1. [고객관리] 메뉴에서 해당 고객 리스트 클릭하여 상세창 열기',
-                '2. "계약서 및 서류 (선택영역)" 섹션 확인',
-                '3. [구독 견적서] 항목에서 파일 선택 버튼을 눌러 확정된 견적서 업로드'
+                '2. "파트너가 등록해야할 서류" 섹션 확인',
+                '3. [최종견적서] 항목에서 파일 선택 버튼을 눌러 확정된 견적서 업로드'
             ],
             images: ['https://cdn.imweb.me/upload/S20250904697320f4fd9ed/fea0e77358ee6.png']
         },
@@ -113,7 +113,7 @@ export default function PartnerManualPage() {
             actions: [
                 '1. 시공 완료 후 [고객관리] 상세창 접속',
                 '2. 시공 전/중/후 현장 사진 업로드 (다중 사진 등록 가능)',
-                '3. 고객이 서명한 "시공완료 확인서" 스캔본 또는 사진 첨부'
+                '3. 고객이 서명한 "시공 계약서/시공 확인서" 스캔본 또는 사진 첨부'
             ]
         },
         {
@@ -122,9 +122,8 @@ export default function PartnerManualPage() {
             actor: '고객',
             description: '상담원 해피콜 수신 및 유선 계약 확인 (발신번호: 02-2056-4701)',
             actions: [
-                '1. 시공 서류 등록 후 파트너가 "녹취요청" 상태로 변경',
-                '2. KCC 구독센터 상담원이 고객에게 해피콜(전화) 진행',
-                '3. 시공 완료 여부 및 향후 결제 내용 유선 확인 및 녹취 동의'
+                '1. KCC구독 계약센터에서 고객에게 해피콜(전화) 진행',
+                '2. 시공 완료 여부 및 향후 결제 내용 유선 확인 및 녹취 동의'
             ]
         },
         {
@@ -216,7 +215,7 @@ export default function PartnerManualPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             {steps.map((item) => (
                                 <div key={item.step} style={{ position: 'relative', display: 'flex', gap: '2rem', zIndex: 1 }}>
-                                    
+
                                     <div style={{
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -271,7 +270,7 @@ export default function PartnerManualPage() {
                                                 <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0, fontWeight: 500 }}>{item.description}</p>
                                             </div>
                                         </div>
-                                        
+
                                         <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '0.75rem' }}>
                                             <ul style={{ margin: 0, paddingLeft: '0', listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: item.images ? '1.5rem' : 0 }}>
                                                 {item.actions.map((action, i) => (
@@ -293,21 +292,21 @@ export default function PartnerManualPage() {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    
+
                                                     {item.images.length === 1 ? (
                                                         <div style={{ border: '1px solid #e2e8f0', borderRadius: '0 0 0.5rem 0.5rem', overflow: 'hidden', background: '#fff' }}>
-                                                            <img 
-                                                                src={item.images[0]} 
+                                                            <img
+                                                                src={item.images[0]}
                                                                 alt={`Step ${item.step} Screenshot`}
                                                                 style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'block', cursor: 'zoom-in' }}
                                                                 onClick={() => setSelectedImage(item.images![0])}
                                                             />
                                                         </div>
                                                     ) : (
-                                                        <div ref={scrollRef} className="horizontal-scroll" style={{ 
-                                                            display: 'flex', 
-                                                            gap: '0.75rem', 
-                                                            overflowX: 'auto', 
+                                                        <div ref={scrollRef} className="horizontal-scroll" style={{
+                                                            display: 'flex',
+                                                            gap: '0.75rem',
+                                                            overflowX: 'auto',
                                                             padding: '1rem',
                                                             background: '#fff',
                                                             border: '1px solid #e2e8f0',
@@ -316,21 +315,21 @@ export default function PartnerManualPage() {
                                                             WebkitOverflowScrolling: 'touch'
                                                         }}>
                                                             {item.images.map((imgUrl, imgIdx) => (
-                                                                <div key={imgIdx} style={{ 
-                                                                    flex: '0 0 100%', 
-                                                                    maxWidth: '260px', 
+                                                                <div key={imgIdx} style={{
+                                                                    flex: '0 0 100%',
+                                                                    maxWidth: '260px',
                                                                     border: '1px solid #f1f5f9',
                                                                     borderRadius: '0.5rem',
                                                                     overflow: 'hidden',
                                                                     scrollSnapAlign: 'start'
                                                                 }} className="carousel-item">
-                                                                    <img 
-                                                                        src={imgUrl} 
+                                                                    <img
+                                                                        src={imgUrl}
                                                                         alt={`Step ${item.step} Image ${imgIdx + 1}`}
-                                                                        style={{ 
-                                                                            width: '100%', 
-                                                                            height: 'auto', 
-                                                                            maxHeight: '450px', 
+                                                                        style={{
+                                                                            width: '100%',
+                                                                            height: 'auto',
+                                                                            maxHeight: '450px',
                                                                             objectFit: 'contain',
                                                                             display: 'block',
                                                                             cursor: 'zoom-in'
@@ -358,44 +357,44 @@ export default function PartnerManualPage() {
 
             {/* Image Zoom Modal */}
             {selectedImage && (
-                <div 
-                    style={{ 
-                        position: 'fixed', 
-                        top: 0, 
-                        left: 0, 
-                        width: '100vw', 
-                        height: '100vh', 
-                        backgroundColor: 'rgba(0,0,0,0.85)', 
-                        zIndex: 9999, 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: 'rgba(0,0,0,0.85)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         cursor: 'zoom-out',
                         padding: '2rem'
                     }}
                     onClick={() => setSelectedImage(null)}
                 >
                     <div style={{ position: 'relative', maxWidth: '100%', maxHeight: '100%' }}>
-                        <img 
-                            src={selectedImage} 
-                            alt="Full Size" 
-                            style={{ 
-                                display: 'block', 
-                                maxWidth: '100vw', 
-                                maxHeight: '90vh', 
+                        <img
+                            src={selectedImage}
+                            alt="Full Size"
+                            style={{
+                                display: 'block',
+                                maxWidth: '100vw',
+                                maxHeight: '90vh',
                                 borderRadius: '4px',
                                 boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
-                            }} 
+                            }}
                         />
-                        <button 
-                            style={{ 
-                                position: 'absolute', 
-                                top: '-40px', 
-                                right: '0', 
-                                background: 'transparent', 
-                                border: 'none', 
-                                color: 'white', 
-                                fontSize: '24px', 
+                        <button
+                            style={{
+                                position: 'absolute',
+                                top: '-40px',
+                                right: '0',
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'white',
+                                fontSize: '24px',
                                 cursor: 'pointer',
                                 fontWeight: 'bold'
                             }}
