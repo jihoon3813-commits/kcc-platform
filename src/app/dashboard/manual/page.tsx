@@ -2,6 +2,7 @@
 
 import Sidebar from '@/components/Sidebar';
 import AdminSidebar from '@/components/AdminSidebar';
+import { useRef } from 'react';
 
 interface ManualStep {
     step: string;
@@ -14,7 +15,8 @@ interface ManualStep {
 
 export default function PartnerManualPage() {
     const isAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
-    
+    const scrollRef = useRef<HTMLDivElement>(null);
+
     const steps: ManualStep[] = [
         {
             step: '01',
@@ -155,6 +157,17 @@ export default function PartnerManualPage() {
         }
     };
 
+    const handleScroll = (direction: 'left' | 'right') => {
+        if (scrollRef.current) {
+            const { scrollLeft, clientWidth } = scrollRef.current;
+            const scrollAmount = clientWidth * 0.8;
+            scrollRef.current.scrollTo({
+                left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>
             {isAdmin ? <AdminSidebar /> : <Sidebar />}
@@ -269,42 +282,60 @@ export default function PartnerManualPage() {
                                             </ul>
 
                                             {item.images && item.images.length > 0 && (
-                                                <div style={{ marginTop: '1rem' }}>
-                                                    <div style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '0.5rem 0.5rem 0 0', borderBottom: 'none', fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
-                                                        {item.actor === '고객' ? '📱 모바일 화면 예시' : '🖥️ 시스템 화면 예시'}
+                                                <div style={{ marginTop: '1rem', position: 'relative' }}>
+                                                    <div style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '0.5rem 0.5rem 0 0', borderBottom: 'none', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <span>{item.actor === '고객' ? '📱 모바일 화면 예시' : '🖥️ 시스템 화면 예시'}</span>
+                                                        {item.images.length > 1 && (
+                                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                <button onClick={() => handleScroll('left')} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '4px', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}>◀</button>
+                                                                <button onClick={() => handleScroll('right')} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '4px', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}>▶</button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     
                                                     {item.images.length === 1 ? (
-                                                        <div style={{ border: '1px solid #e2e8f0', borderRadius: '0 0 0.5rem 0.5rem', overflow: 'hidden' }}>
+                                                        <div style={{ border: '1px solid #e2e8f0', borderRadius: '0 0 0.5rem 0.5rem', overflow: 'hidden', background: '#fff' }}>
                                                             <img 
                                                                 src={item.images[0]} 
                                                                 alt={`Step ${item.step} Screenshot`}
-                                                                style={{ width: '100%', display: 'block' }}
+                                                                style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'block' }}
                                                             />
                                                         </div>
                                                     ) : (
-                                                        <div className="horizontal-scroll" style={{ 
+                                                        <div ref={scrollRef} className="horizontal-scroll" style={{ 
                                                             display: 'flex', 
-                                                            gap: '1rem', 
+                                                            gap: '0.75rem', 
                                                             overflowX: 'auto', 
                                                             padding: '1rem',
                                                             background: '#fff',
                                                             border: '1px solid #e2e8f0',
-                                                            borderRadius: '0 0 0.5rem 0.5rem'
+                                                            borderRadius: '0 0 0.5rem 0.5rem',
+                                                            scrollSnapType: 'x mandatory',
+                                                            WebkitOverflowScrolling: 'touch'
                                                         }}>
                                                             {item.images.map((imgUrl, imgIdx) => (
                                                                 <div key={imgIdx} style={{ 
-                                                                    flex: '0 0 100%', // Mobile default
-                                                                    minWidth: '200px',
+                                                                    flex: '0 0 100%', 
+                                                                    maxWidth: '260px', 
                                                                     border: '1px solid #f1f5f9',
                                                                     borderRadius: '0.5rem',
-                                                                    overflow: 'hidden'
+                                                                    overflow: 'hidden',
+                                                                    scrollSnapAlign: 'start'
                                                                 }} className="carousel-item">
                                                                     <img 
                                                                         src={imgUrl} 
                                                                         alt={`Step ${item.step} Image ${imgIdx + 1}`}
-                                                                        style={{ width: '100%', height: 'auto', display: 'block' }}
+                                                                        style={{ 
+                                                                            width: '100%', 
+                                                                            height: 'auto', 
+                                                                            maxHeight: '450px', 
+                                                                            objectFit: 'contain',
+                                                                            display: 'block' 
+                                                                        }}
                                                                     />
+                                                                    <div style={{ padding: '0.5rem', fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center', background: '#f8fafc' }}>
+                                                                        {imgIdx + 1} / {item.images?.length || 0}
+                                                                    </div>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -323,24 +354,17 @@ export default function PartnerManualPage() {
 
             <style jsx>{`
                 .horizontal-scroll {
-                    scrollbar-width: thin;
-                    scrollbar-color: #cbd5e1 #f8fafc;
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
                 }
                 .horizontal-scroll::-webkit-scrollbar {
-                    height: 6px;
-                }
-                .horizontal-scroll::-webkit-scrollbar-track {
-                    background: #f8fafc;
-                }
-                .horizontal-scroll::-webkit-scrollbar-thumb {
-                    background-color: #cbd5e1;
-                    border-radius: 6px;
+                    display: none;
                 }
                 
-                /* PC View: 3 items */
-                @media (min-width: 1024px) {
+                @media (min-width: 768px) {
                     .carousel-item {
-                        flex: 0 0 calc((100% - 2rem) / 3) !important;
+                        flex: 0 0 calc((100% - 1.5rem) / 3) !important;
+                        max-width: none !important;
                     }
                 }
             `}</style>
