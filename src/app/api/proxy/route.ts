@@ -30,6 +30,9 @@ export async function GET(request: Request) {
             data = await convex!.query(api.auth.getPartners);
         } else if (type === 'guest_customers') {
             data = await convex!.query(api.customers.getGuestCustomers);
+            if (Array.isArray(data)) {
+                data = data.map(c => ({ ...c, isGuest: true }));
+            }
         } else {
             // customers
             data = await convex!.query(api.customers.getCustomers);

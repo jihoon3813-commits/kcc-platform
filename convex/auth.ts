@@ -80,6 +80,7 @@ export const createPartner = mutation({
     bizNum: v.string(),
     account: v.string(),
     email: v.string(),
+    address: v.optional(v.string()),
     origin: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -93,7 +94,7 @@ export const createPartner = mutation({
       return { result: "error", message: "이미 존재하는 아이디입니다." };
     }
 
-    const { origin, ...restArgs } = args;
+    const { origin, address, ...restArgs } = args;
     const dateStr = new Date().toISOString();
     
     // Status depends on origin: admin -> '정상', request -> '승인대기'
@@ -102,7 +103,7 @@ export const createPartner = mutation({
 
     await ctx.db.insert("partners", {
       ...restArgs,
-      address: "",
+      address: address || "",
       joinDate: joinDate,
       status: status,
       origin: origin || "admin"

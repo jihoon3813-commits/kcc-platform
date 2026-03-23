@@ -197,7 +197,7 @@ const DocItemKeyed = ({ docName, label, documents, uploading, onUpload, onDelete
     );
 };
 
-const CustomerDetailModal = ({ customer, onClose, onUpdate, mode = 'customer' }: { customer: Customer; onClose: () => void; onUpdate: () => void; mode?: 'customer' | 'settlement' }) => {
+const CustomerDetailModal = ({ customer, onClose, onUpdate, mode = 'customer', isGuest = false }: { customer: Customer; onClose: () => void; onUpdate: () => void; mode?: 'customer' | 'settlement', isGuest?: boolean }) => {
     const [status, setStatus] = useState<Status>(customer.status);
     const [remarks, setRemarks] = useState(customer.remarks || '');
     const [documents, setDocuments] = useState<Record<string, AuditDocument>>(customer.documents || {});
@@ -345,7 +345,7 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate, mode = 'customer' }:
         try {
             const response = await fetch('/api/proxy', {
                 method: 'POST',
-                body: JSON.stringify({ action: 'deleteCustomer', type: 'customers', id: customer.id })
+                body: JSON.stringify({ action: 'deleteCustomer', type: isGuest ? 'guest_customers' : 'customers', id: customer.id })
             });
             if (response.ok) {
                 alert('고객 정보가 삭제되었습니다.');
@@ -364,7 +364,7 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate, mode = 'customer' }:
         try {
             const payload = {
                 action: 'update',
-                type: 'customers',
+                type: isGuest ? 'guest_customers' : 'customers',
                 id: customer.id,
                 status: status,
                 remarks: remarks,
@@ -699,12 +699,17 @@ function AdminCustomerListContent() {
     const fetchAllCustomers = async () => {
         setLoading(true);
         try {
-            const [cRes, pRes] = await Promise.all([
+            const [cRes, gRes, pRes] = await Promise.all([
                 fetch('/api/proxy?type=customers', { cache: 'no-store' }),
+                fetch('/api/proxy?type=guest_customers', { cache: 'no-store' }),
                 fetch('/api/proxy?type=partners', { cache: 'no-store' })
             ]);
-            const data = await cRes.json();
+            const cData = await cRes.json();
+            const gData = await gRes.json();
             const pData = await pRes.json();
+
+            // Merge customers and guest_customers
+            const data = [...(Array.isArray(cData) ? cData : []), ...(Array.isArray(gData) ? gData : [])];
 
             if (Array.isArray(pData)) {
                 const uniquePartners = Array.from(new Set(pData.map((p: any) => p['파트너명'] || p['name'] || '').filter(Boolean))) as string[];
@@ -763,7 +768,8 @@ function AdminCustomerListContent() {
                         ownershipType: findVal(['주택소유', 'ownershipType']) || '미지정',
                         constructionDate: findVal(['시공예정일', '시공일', 'constructionDate']) || '',
                         statusUpdatedAt: findVal(['상태변경일', 'statusUpdatedAt']) || (item._creationTime ? new Date(item._creationTime).toISOString().split('T')[0] : (findVal(['접수일', 'date']) || '').toString().split('T')[0]),
-                        documents: docsJson ? (typeof docsJson === 'string' ? JSON.parse(docsJson) : docsJson) : {}
+                        documents: docsJson ? (typeof docsJson === 'string' ? JSON.parse(docsJson) : docsJson) : {},
+                        isGuest: !!item.isGuest
                     };
                 });
                 const sorted = mappedData.sort((a: any, b: any) => {
@@ -1162,6 +1168,7 @@ function AdminCustomerListContent() {
                 <CustomerDetailModal 
                     customer={selectedCustomer} 
                     mode="customer"
+                    isGuest={(selectedCustomer as any).isGuest || false}
                     onClose={() => setSelectedCustomer(null)} 
                     onUpdate={() => {
                         fetchAllCustomers();

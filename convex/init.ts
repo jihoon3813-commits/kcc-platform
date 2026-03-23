@@ -129,3 +129,63 @@ export const forceSeed = mutation({
     return "Samples added.";
   }
 });
+
+export const seedLots = mutation({
+  handler: async (ctx) => {
+    // 1. Reset/Ensure Admin
+    const admin = await ctx.db.query("admins").withIndex("by_custom_id", q => q.eq("id", "admin")).first();
+    if (admin) {
+        await ctx.db.patch(admin._id, { password: "admin", name: "관리자" });
+    } else {
+        await ctx.db.insert("admins", { id: "admin", password: "admin", name: "관리자" });
+    }
+
+    // 2. Ensure Partner
+    const guest = await ctx.db.query("partners").withIndex("by_custom_id", q => q.eq("id", "guest_demo")).first();
+    if (!guest) {
+        await ctx.db.insert("partners", {
+            id: "guest_demo", password: "guest_demo", name: "체험 파트너", owner: "김체험",
+            phone: "010-1234-5678", address: "서울시 강남구", region: "서울, 경기",
+            bizNum: "123-45-67890", account: "국민 123456-12-123456", email: "demo@example.com",
+            joinDate: new Date().toISOString(), origin: "admin", status: "정상"
+        });
+    }
+
+    const statuses: any[] = ['등록완료', '신용동의', '계약완료', '시공자료요청', '녹취완료', '1차정산완료', '최종정산완료'];
+    const names = ["김철수", "이영희", "박민준", "최수연", "정해인", "강하늘", "지창욱", "한소희", "송강", "임윤아"];
+    
+    // 3. Add 10 customers to 'customers' (for Admin view)
+    for(let i=0; i<10; i++) {
+        const id = `KCC_REAL_${i+1}`;
+        const existing = await ctx.db.query("customers").withIndex("by_custom_id", q => q.eq("id", id)).first();
+        if (existing) await ctx.db.delete(existing._id);
+        
+        await ctx.db.insert("customers", {
+            id, name: names[i], phone: `010-0000-100${i}`, birthDate: "19850101",
+            address: "서울시 종로구 세종대로 1", amount: String(5000000 + (i * 1000000)),
+            downPayment: "0", months: "60", transferDate: "15",
+            date: "2026-03-20", status: statuses[i % statuses.length],
+            partnerName: "일반 파트너", partnerId: "partner_01", docs_json: "{}", 
+            statusUpdatedAt: "2026-03-21", constructionDate: "2026-04-01"
+        });
+    }
+
+    // 4. Add 10 customers to 'guest_customers' (for Guest/Trial view)
+    for(let i=0; i<10; i++) {
+        const id = `KCC_GUEST_${i+1}`;
+        const existing = await ctx.db.query("guest_customers").withIndex("by_custom_id", q => q.eq("id", id)).first();
+        if (existing) await ctx.db.delete(existing._id);
+        
+        await ctx.db.insert("guest_customers", {
+            id, name: names[9-i], phone: `010-9999-200${i}`, birthDate: "19900101",
+            address: "경기도 성남시 분당구", amount: String(3000000 + (i * 500000)),
+            downPayment: "0", months: "48", transferDate: "5",
+            date: "2026-03-21", status: statuses[i % statuses.length],
+            partnerName: "체험 파트너", partnerId: "guest_demo", docs_json: "{}",
+            statusUpdatedAt: "2026-03-22", constructionDate: ""
+        });
+    }
+
+    return "Seed Lots complete.";
+  }
+});

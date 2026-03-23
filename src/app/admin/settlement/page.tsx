@@ -20,8 +20,14 @@ export default function AdminSettlement() {
     const fetchSettlementData = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/proxy?type=customers', { cache: 'no-store' });
-            const data = await response.json();
+            const [cRes, gRes] = await Promise.all([
+                fetch('/api/proxy?type=customers', { cache: 'no-store' }),
+                fetch('/api/proxy?type=guest_customers', { cache: 'no-store' })
+            ]);
+            const cData = await cRes.json();
+            const gData = await gRes.json();
+            
+            const data = [...(Array.isArray(cData) ? cData : []), ...(Array.isArray(gData) ? gData : [])];
             
             if (Array.isArray(data)) {
                 const mappedData = data.map((item: any) => {
@@ -456,7 +462,7 @@ export default function AdminSettlement() {
             {selectedCustomer && (
                 <CustomerDetailModal
                     customer={selectedCustomer}
-                    isGuest={false}
+                    isGuest={(selectedCustomer as any).isGuest || false}
                     isAdmin={true}
                     mode="settlement"
                     onClose={() => setSelectedCustomer(null)}
