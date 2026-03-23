@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../../convex/_generated/api';
 
-const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL;
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL || "https://agreeable-poodle-811.convex.cloud";
 let convex: ConvexHttpClient | null = null;
 
 if (convexUrl) {
@@ -74,9 +74,15 @@ export async function GET(request: Request) {
         }
 
         return NextResponse.json(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Convex GET Proxy Error:', error);
-        return NextResponse.json(type.includes('customers') ? [] : { error: 'Failed to fetch' }, { status: 500 });
+        return NextResponse.json({ 
+            error: 'Failed to fetch', 
+            details: error.message,
+            stack: error.stack,
+            configured: !!convexUrl,
+            envKeysToCheck: ['NEXT_PUBLIC_CONVEX_URL', 'CONVEX_URL']
+        }, { status: 500 });
     }
 }
 
