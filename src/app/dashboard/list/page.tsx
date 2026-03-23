@@ -59,19 +59,23 @@ export default function CustomerList() {
 
             if (Array.isArray(data)) {
                 const storedPartner = localStorage.getItem('kcc_partner') ? JSON.parse(localStorage.getItem('kcc_partner')!) : null;
-                const myPartnerId = storedPartner?.id;
-                const myPartnerName = storedPartner?.name;
+                const myPartnerId = String(storedPartner?.id || "").trim();
+                const myPartnerName = String(storedPartner?.name || "").trim();
+
+                console.log('My Partner Info:', { myPartnerId, myPartnerName });
 
                 const filteredByPartner = data.filter((item: any) => {
                     // Normalize check for Partner ID and Name
-                    const itemPartnerId = item.partnerId || item['파트너ID'] || item['파트너 ID'] || item.id;
-                    const itemPartnerName = item.partnerName || item['파트너명'] || item['파트너 명'];
+                    const itemPartnerId = String(item.partnerId || item['파트너ID'] || item['파트너 ID'] || "").trim() || item.id;
+                    const itemPartnerName = String(item.partnerName || item['파트너명'] || item['파트너 명'] || "").trim();
 
-                    // Admin case: allow all (if no myPartnerId, but usually there is one in dashboard)
-                    // For now, keep existing logic but make it more inclusive
-                    return (myPartnerId && String(itemPartnerId) === String(myPartnerId)) ||
+                    // Special case for guest_demo: if I am guest_demo, show all guest items that match my ID
+                    if (myPartnerId === 'guest_demo' && itemPartnerId === 'guest_demo') return true;
+
+                    return (myPartnerId && itemPartnerId === myPartnerId) ||
                         (myPartnerName && itemPartnerName === myPartnerName);
                 });
+                console.log('Filtered Customers Count:', filteredByPartner.length);
 
                 const mappedData = filteredByPartner.map((item: any) => {
                     const findVal = (keywords: string[]) => {

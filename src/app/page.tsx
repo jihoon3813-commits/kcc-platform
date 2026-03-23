@@ -214,7 +214,7 @@ export default function Home() {
               onClick={() => {
                 localStorage.setItem('kcc_partner', JSON.stringify({
                   id: 'guest_demo',
-                  name: '체험용 파트너',
+                  name: '체험 파트너',
                   owner: '홍길동',
                   phone: '010-1234-5678',
                   region: '전국'
@@ -528,7 +528,7 @@ export default function Home() {
                     e.preventDefault();
                     localStorage.setItem('kcc_partner', JSON.stringify({
                       id: 'guest_demo',
-                      name: '체험용 파트너',
+                      name: '체험 파트너',
                       owner: '홍길동',
                       phone: '010-1234-5678',
                       region: '전국'
