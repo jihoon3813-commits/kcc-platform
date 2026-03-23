@@ -9,6 +9,7 @@ const menuItems = [
     { name: '파트너 관리', path: '/admin/partners', icon: '🤝' },
     { name: '전체 고객 관리', path: '/admin/customers', icon: '👤' },
     { name: '정산 관리', path: '/admin/settlement', icon: '💰' },
+    { name: '설정', path: '/admin/settings/sms', icon: '⚙️' },
 ];
 
 export default function AdminSidebar() {
@@ -43,26 +44,26 @@ export default function AdminSidebar() {
             {/* Desktop Sidebar */}
             <aside className="admin-sidebar-desktop" style={{
                 width: '260px',
-                backgroundColor: '#0f172a',
-                color: '#f8fafc',
+                backgroundColor: '#ffffff',
+                color: '#1e293b',
                 height: '100vh',
                 position: 'fixed',
                 left: 0,
                 top: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                borderRight: '1px solid #1e293b',
+                borderRight: '1px solid #e2e8f0',
                 zIndex: 100
             }}>
-                <div style={{ padding: '2rem', borderBottom: '1px solid #1e293b' }}>
+                <div style={{ padding: '2rem', borderBottom: '1px solid #e2e8f0' }}>
                     <Link href="/admin">
                         <img
-                            src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/e840c9a46f66a.png"
+                            src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/5b115594e9a66.png"
                             alt="KCC Logo"
                             style={{ height: '24px', marginBottom: '1rem', cursor: 'pointer' }}
                         />
                     </Link>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#38bdf8' }}>ADMIN CONTROL</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0046AD' }}>ADMIN CONTROL</div>
                 </div>
 
                 <nav style={{ flex: 1, padding: '1.5rem 1rem' }}>
@@ -80,14 +81,14 @@ export default function AdminSidebar() {
                                             padding: '0.875rem 1.25rem',
                                             borderRadius: '0.75rem',
                                             textDecoration: 'none',
-                                            color: isActive ? '#fff' : '#94a3b8',
-                                            backgroundColor: isActive ? '#1e293b' : 'transparent',
+                                            color: isActive ? '#0046AD' : '#64748b',
+                                            backgroundColor: isActive ? '#f1f5f9' : 'transparent',
                                             fontSize: '0.9rem',
                                             fontWeight: isActive ? 700 : 500,
                                             transition: 'all 0.2s'
                                         }}
                                     >
-                                        <span>{item.icon}</span>
+                                        <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
                                         {item.name}
                                     </Link>
                                 </li>
@@ -96,13 +97,60 @@ export default function AdminSidebar() {
                     </ul>
                 </nav>
 
-                <div style={{ padding: '1.5rem', borderTop: '1px solid #1e293b' }}>
+                <div style={{ padding: '0 1rem 1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                    <Link
+                        href="/"
+                        target="_blank"
+                        className="sidebar-shortcut-link"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.75rem 1rem',
+                            borderRadius: '0.625rem',
+                            textDecoration: 'none',
+                            color: '#475569',
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        <span style={{ fontSize: '1.1rem' }}>🌐</span>
+                        <span style={{ lineHeight: 1.2 }}>파트너를 위한<br />구독솔루션 안내</span>
+                    </Link>
+                    <Link
+                        href="/guide"
+                        target="_blank"
+                        className="sidebar-shortcut-link"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.75rem 1rem',
+                            borderRadius: '0.625rem',
+                            textDecoration: 'none',
+                            color: '#475569',
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        <span style={{ fontSize: '1.2rem' }}>📖</span>
+                        <span style={{ lineHeight: 1.2 }}>고객님을 위한<br />구독솔루션 안내</span>
+                    </Link>
+                </div>
+
+                <div style={{ padding: '1.5rem', borderTop: '1px solid #e2e8f0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', padding: '0.5rem' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800 }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#e0e7ff', color: '#0046AD', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800 }}>
                             AD
                         </div>
                         <div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{adminName || '관리자'}</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>{adminName || '관리자'}</div>
                             <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Super Admin</div>
                         </div>
                     </div>
@@ -112,13 +160,13 @@ export default function AdminSidebar() {
                             width: '100%',
                             padding: '0.75rem',
                             borderRadius: '0.5rem',
-                            border: '1px solid #1e293b',
-                            backgroundColor: 'transparent',
+                            border: '1px solid #fee2e2',
+                            backgroundColor: '#fef2f2',
                             color: '#ef4444',
                             fontSize: '0.8rem',
                             fontWeight: 700,
                             cursor: 'pointer',
-                            transition: 'background 0.2s'
+                            transition: 'all 0.2s'
                         }}
                     >
                         로그아웃
@@ -133,8 +181,8 @@ export default function AdminSidebar() {
                 left: 0,
                 right: 0,
                 height: '70px',
-                backgroundColor: '#0f172a',
-                borderTop: '1px solid #1e293b',
+                backgroundColor: '#ffffff',
+                borderTop: '1px solid #e2e8f0',
                 display: 'none',
                 gridTemplateColumns: `repeat(${menuItems.length}, 1fr)`,
                 zIndex: 1000,
@@ -153,7 +201,7 @@ export default function AdminSidebar() {
                                 justifyContent: 'center',
                                 gap: '0.25rem',
                                 textDecoration: 'none',
-                                color: isActive ? '#38bdf8' : '#94a3b8',
+                                color: isActive ? '#0046AD' : '#64748b',
                                 fontSize: '0.7rem',
                                 fontWeight: isActive ? 700 : 500,
                                 transition: 'all 0.2s'
@@ -174,6 +222,14 @@ export default function AdminSidebar() {
                     .admin-bottom-nav {
                         display: grid !important;
                     }
+                    .admin-sidebar-desktop, .admin-bottom-nav {
+                        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+                    }
+                }
+                .sidebar-shortcut-link:hover {
+                    background-color: #f1f5f9 !important;
+                    border-color: #cbd5e1 !important;
+                    color: #0046AD !important;
                 }
             `}</style>
         </>

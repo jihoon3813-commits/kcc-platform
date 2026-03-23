@@ -244,87 +244,204 @@ export default function Home() {
 
         {/* Subscription Process Section */}
         <section className="process-section" style={{
-          padding: '3rem 0',
-          background: '#0f172a',
-          color: 'white'
+          padding: '5rem 0',
+          background: '#0a0f1a',
+          color: 'white',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <div className="container">
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          {/* Subtle background glow */}
+          <div style={{
+            position: 'absolute',
+            top: '10%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '800px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
+            zIndex: 0
+          }} />
+
+          <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
               <div style={{
                 display: 'inline-block',
-                padding: '0.4rem 1rem',
-                background: 'rgba(59, 130, 246, 0.15)',
+                padding: '0.4rem 1.25rem',
+                background: 'rgba(59, 130, 246, 0.1)',
                 borderRadius: '2rem',
-                marginBottom: '1rem'
+                marginBottom: '1.25rem',
+                border: '1px solid rgba(59, 130, 246, 0.2)'
               }}>
-                <span style={{ color: '#60a5fa', fontWeight: 700, fontSize: '0.8rem' }}>📋 구독 진행 프로세스</span>
+                <span style={{ color: '#60a5fa', fontWeight: 800, fontSize: '0.85rem' }}>📋 구독 진행 프로세스</span>
               </div>
               <h2 className="process-title" style={{
-                fontSize: '1.5rem',
-                fontWeight: 800,
-                marginBottom: '0.75rem',
-                letterSpacing: '-0.02em',
-                lineHeight: 1.3
+                fontSize: 'clamp(1.5rem, 6vw, 2.5rem)',
+                fontWeight: 900,
+                marginBottom: '1rem',
+                letterSpacing: '-0.03em',
+                lineHeight: 1.3,
+                wordBreak: 'keep-all'
               }}>
-                고객 구독 신청부터 정산까지,<br className="mobile-br" /> 한눈에 보는 전체 흐름
+                고객 구독 신청부터 정산까지,<br /> 
+                <span style={{ color: '#60a5fa' }}>한눈에 보는 전체 흐름</span>
               </h2>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '500px', margin: '0 auto', lineHeight: 1.6 }}>
-                파트너님이 고객을 접수하면,<br className="mobile-br" /> 아래 단계를 거쳐 정산까지 완료됩니다.
+              <p style={{ color: '#94a3b8', fontSize: '1rem', maxWidth: '700px', margin: '0 auto', lineHeight: 1.7 }}>
+                파트너와 고객, 그리고 구독센터가 하나의 흐름으로 연결됩니다.<br /> 
+                체계적인 단계별 진행으로 신속한 정산을 지원합니다.
               </p>
             </div>
 
+            {/* Role Legend */}
             <div style={{
-              display: 'grid',
-              gap: '0.5rem',
-              maxWidth: '1100px',
-              margin: '0 auto'
-            }} className="process-grid">
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '1rem',
+              marginBottom: '3rem',
+              flexWrap: 'wrap'
+            }}>
               {[
-                { step: '1', icon: '📝', title: '접수/신용동의', desc: '고객정보 입력 → 신용조회 동의', color: '#fbbf24' },
-                { step: '2', icon: '📄', title: '1차승인/서류등록', desc: '본사 심사 후 1차 승인 → 서류 업로드', color: '#818cf8' },
-                { step: '3', icon: '🏆', title: '최종승인/서류등록', desc: '서류 검토 → 최종 승인 → 시공계약서 등록', color: '#10b981' },
-                { step: '4', icon: '📞', title: '전자서명/녹취', desc: '전자서명 및 해피콜(녹취)로 계약 확정', color: '#22d3ee' },
-                { step: '5', icon: '💰', title: '정산진행', desc: '녹취 완료 → 다음날 수수료 입금!', color: '#4ade80' }
-              ].map((item, i) => (
-                <div key={i} className="process-card" style={{
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  border: '1px solid #334155',
-                  borderRadius: '0.75rem',
-                  padding: '0.75rem 1rem',
+                { label: '파트너', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+                { label: '고객', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+                { label: '구독센터', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' }
+              ].map((role) => (
+                <div key={role.label} style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem'
+                  gap: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  background: role.bg,
+                  borderRadius: '2rem',
+                  border: `1px solid ${role.color}33`,
+                  fontSize: '0.85rem',
+                  fontWeight: 800,
+                  color: role.color
                 }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: role.color }} />
+                  {role.label}
+                </div>
+              ))}
+            </div>
+
+            {/* Timeline Steps */}
+            <div className="timeline-container" style={{
+              maxWidth: '1000px',
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              {[
+                { step: '01', role: '파트너', title: '신규 등록', desc: '고객/견적 정보 입력 및 안내 문자 자동 발송', icon: '📝', color: '#f59e0b' },
+                { step: '02', role: '고객', title: '문자 확인', desc: '신용조회 동의 및 필수 서류 등록', icon: '📲', color: '#3b82f6' },
+                { step: '03', role: '파트너', title: '견적서 등록', desc: '파트너 어드민에서 고객 선택 후 견적서 파일 첨부', icon: '📁', color: '#f59e0b' },
+                { step: '04', role: '구독센터', title: '심사 진행', desc: '신용 조회 및 제출 서류 최종 승인 확인', icon: '⚖️', color: '#10b981' },
+                { step: '05', role: '고객', title: '전자 서명', desc: '계약 문자 수신 후 본인인증 및 온라인 서명', icon: '✍️', color: '#3b82f6' },
+                { step: '06', role: '구독센터', title: '1차 정산 (50%)', desc: '전자서명 완료 후 +3영업일 이내 지급', icon: '💳', color: '#10b981' },
+                { step: '07', role: '파트너', title: '시공 후 서류 등록', desc: '시공계약서/확인서 및 현장 사진 등록', icon: '📸', color: '#f59e0b' },
+                { step: '08', role: '고객', title: '녹취 약정 진행', desc: '상담원 해피콜 수신 및 유선 계약 확인', icon: '📞', color: '#3b82f6' },
+                { step: '09', role: '구독센터', title: '최종 정산 (50%)', desc: '녹취 완료 후 +3영업일 이내 잔금 정산', icon: '💰', color: '#10b981' }
+              ].map((item, i) => (
+                <div key={i} className="timeline-item" style={{
+                  display: 'flex',
+                  alignItems: 'stretch',
+                  gap: '1.5rem',
+                  position: 'relative'
+                }}>
+                  {/* Vertical Line */}
+                  {i < 8 && (
+                    <div style={{
+                      position: 'absolute',
+                      left: '24px',
+                      top: '48px',
+                      bottom: '-24px',
+                      width: '2px',
+                      background: 'linear-gradient(to bottom, #1e293b, transparent)',
+                      zIndex: 0
+                    }} />
+                  )}
+
                   <div style={{
-                    background: item.color,
-                    color: '#0f172a',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '1rem',
+                    background: '#1e293b',
+                    border: `2px solid ${item.color}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontWeight: 800,
-                    fontSize: '0.85rem',
-                    flexShrink: 0
+                    fontSize: '1.5rem',
+                    flexShrink: 0,
+                    zIndex: 1,
+                    boxShadow: `0 0 20px ${item.color}1a`
                   }}>
-                    {item.step}
+                    {item.icon}
                   </div>
-                  <div style={{ fontSize: '1.25rem', flexShrink: 0 }}>{item.icon}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 style={{ fontWeight: 700, color: item.color, fontSize: '0.9rem', marginBottom: '0.1rem' }}>{item.title}</h4>
-                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.desc}</p>
+
+                  <div style={{
+                    flex: 1,
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    borderRadius: '1.25rem',
+                    padding: '1.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s',
+                    cursor: 'default',
+                    marginBottom: '1rem'
+                  }} className="timeline-content">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: item.color, opacity: 0.6 }}>STEP {item.step}</span>
+                        <h4 style={{ fontSize: '1.15rem', fontWeight: 800 }}>{item.title}</h4>
+                      </div>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 900,
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '0.5rem',
+                        background: `${item.color}1a`,
+                        color: item.color,
+                        border: `1px solid ${item.color}33`
+                      }}>{item.role}</span>
+                    </div>
+                    <p style={{ fontSize: '0.9rem', color: '#94a3b8', lineHeight: 1.5, wordBreak: 'keep-all' }}>{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-              <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-                💡 각 단계별 상태는 파트너 센터 대시보드에서 실시간으로 확인하실 수 있습니다.
+            <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+              <p style={{
+                color: '#64748b',
+                fontSize: '0.95rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}>
+                <span style={{ fontSize: '1.2rem' }}>💡</span> 
+                각 단계별 진행 상태는 <strong>파트너 센터 어드민</strong>에서 실시간으로 추적 가능합니다.
               </p>
             </div>
           </div>
+          
+          <style jsx>{`
+            .timeline-content:hover {
+              background: rgba(255,255,255,0.06) !important;
+              border-color: rgba(255,255,255,0.1) !important;
+              transform: translateX(10px);
+            }
+            @media (max-width: 768px) {
+              .timeline-item { gap: 1rem !important; }
+              .timeline-content { padding: 1.25rem !important; transform: none !important; margin-bottom: 0.5rem !important; }
+              .timeline-content:hover { transform: none !important; }
+              .timeline-item > div:first-child { width: 40px !important; height: 40px !important; font-size: 1.25rem !important; }
+              .timeline-item > div:first-child + div { padding: 1rem !important; }
+              .timeline-container { gap: 0.5rem !important; }
+              div[style*="left: 24px"] { left: 19px !important; }
+            }
+          `}</style>
         </section>
 
         <section className="cta-section" style={{

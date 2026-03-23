@@ -10,11 +10,18 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
     const [amount, setAmount] = useState(15000000);
     const [months, setMonths] = useState(60);
 
-    const annualRate = 0.112; // 연이율 11.2%
-    const monthlyRate = annualRate / 12;
+    const interestRates: { [key: number]: number } = {
+        24: 0.167,
+        36: 0.176,
+        48: 0.205,
+        60: 0.240
+    };
 
-    // 원리금 균등 상환 공식: A = P * { r(1+r)^n / ((1+r)^n - 1) }
-    const rawMonthlyPayment = amount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+    const interestRate = interestRates[months] || 0;
+    const rawMonthlyPayment = months > 0 
+        ? Math.floor(amount / (months * (1 - interestRate))) 
+        : 0;
+
     const monthlyPayment = Math.floor(rawMonthlyPayment / 100) * 100; // 100원 단위 절삭
 
 
@@ -197,7 +204,7 @@ export default function Calculator({ onRegisterClick }: CalculatorProps) {
                 <div style={{ marginTop: '2rem', textAlign: 'center' }}>
                     <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.8, wordBreak: 'keep-all' }}>
                         ※ 위 구독료는 예시이며, 실제 금융 심사 결과에 따라 이율 및 납입금이 변동될 수 있습니다. <br className="desktop-only" />
-                        본 시뮬레이션은 원리금 균등 상환 방식을 기준으로 산출되었습니다.
+                        본 산출된 구독료는 월 약 {(interestRate / months * 100).toFixed(1)}% 이자가 적용된 예상 금액입니다.
                     </p>
                 </div>
             </div>

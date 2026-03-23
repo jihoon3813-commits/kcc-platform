@@ -46,23 +46,22 @@ export default function PartnerRegisterModal({ isOpen, onClose }: PartnerRegiste
 
         setIsSubmitting(true);
         try {
-            // Generate a temporary ID for the request
-            const tempId = `req_${Date.now().toString().slice(-6)}`;
+            // ID is phone number (without hyphens)
+            const phoneAsId = formData.phone.replace(/[^\d]/g, '');
 
             const response = await fetch('/api/proxy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'createPartner', // Changed to known working action
-                    id: tempId,
-                    password: 'N/A', // Default value
+                    action: 'createPartner',
+                    id: phoneAsId,
+                    password: '1111', // Initial password
                     ...formData,
                     email: '',
                     address: '',
                     bizNum: '',
                     account: '',
-                    origin: 'request',
-                    joinDate: new Date().toISOString().split('T')[0]
+                    origin: 'request'
                 })
             });
 
@@ -88,7 +87,7 @@ export default function PartnerRegisterModal({ isOpen, onClose }: PartnerRegiste
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-overlay">
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>무료 파트너 가입 신청</h2>

@@ -42,6 +42,35 @@ export default function Header() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <Link
+                        href="/guide"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary"
+                        style={{
+                            padding: '0.6rem 1.5rem',
+                            borderRadius: '2rem',
+                            fontSize: '0.9rem',
+                            marginRight: '0.75rem',
+                            backgroundColor: '#fbbf24',
+                            border: 'none',
+                            color: '#1e293b',
+                            fontWeight: 700,
+                            boxShadow: '0 4px 12px rgba(251, 191, 36, 0.3)'
+                        }}
+                        onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f59e0b';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(251, 191, 36, 0.4)';
+                        }}
+                        onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = '#fbbf24';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(251, 191, 36, 0.3)';
+                        }}
+                    >
+                        구독 안내
+                    </Link>
+                    <Link
                         href="/login"
                         target="_blank"
                         className="btn-primary"

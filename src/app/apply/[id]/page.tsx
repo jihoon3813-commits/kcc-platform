@@ -3,9 +3,15 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-export default function CustomerApply({ params }: { params: { id: string } }) {
+import { use } from 'react';
+
+export default function CustomerApply({ params }: { params: any }) {
+    // Support both Promise (Next.js 15+) and plain object (Next.js 14 or hybrid)
+    const unwrappedParams = params && typeof params.then === 'function' ? use(params) : params;
+    const id = unwrappedParams?.id;
+
     const [step, setStep] = useState(1);
-    const totalSteps = 4;
+    const totalSteps = 3;
 
     const nextStep = () => setStep(step + 1);
 
@@ -67,25 +73,12 @@ export default function CustomerApply({ params }: { params: { id: string } }) {
                         </a>
 
                         <button onClick={nextStep} className="btn-primary" style={{ width: '100%', padding: '1.125rem', justifyContent: 'center', fontSize: '1.125rem' }}>
-                            본인 인증 시작
+                            구독 계약 진행 (전자 서명)
                         </button>
                     </div>
                 )}
 
                 {step === 2 && (
-                    <div className="animate-fade-in">
-                        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>본인 인증을 진행해 주세요</h2>
-                        <p style={{ color: 'var(--muted)', marginBottom: '2.5rem' }}>금융 심사를 위해 안전한 본인 인증이 필요합니다.</p>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-                            <button className="btn-primary" style={{ background: '#FEE500', color: '#111', justifyContent: 'center' }}>카카오톡 인증</button>
-                            <button className="btn-primary" style={{ background: '#00D82C', color: 'white', justifyContent: 'center' }}>네이버 인증</button>
-                            <button className="btn-primary" style={{ background: 'var(--primary)', color: 'white', justifyContent: 'center' }}>PASS 인증</button>
-                        </div>
-                    </div>
-                )}
-
-                {step === 3 && (
                     <div className="animate-fade-in">
                         <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>전자 계약서 서명</h2>
                         <p style={{ color: 'var(--muted)', marginBottom: '2rem' }}>구독 서비스 이용을 위한 계약 내용을 확인하세요.</p>
@@ -103,7 +96,7 @@ export default function CustomerApply({ params }: { params: { id: string } }) {
                     </div>
                 )}
 
-                {step === 4 && (
+                {step === 3 && (
                     <div className="animate-fade-in" style={{ textAlign: 'center', paddingTop: '3rem' }}>
                         <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🎉</div>
                         <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>신청이 완료되었습니다!</h2>

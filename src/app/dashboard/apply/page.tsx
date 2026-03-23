@@ -314,7 +314,7 @@ export default function Apply() {
                                 </button>
                                 <button
                                     style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', cursor: 'pointer', background: 'white' }}
-                                    onClick={() => router.push('/dashboard')}
+                                    onClick={() => router.push('/dashboard/list')}
                                 >
                                     닫기
                                 </button>

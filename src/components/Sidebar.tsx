@@ -7,8 +7,6 @@ import { usePathname } from 'next/navigation';
 export default function Sidebar() {
     const pathname = usePathname();
     const menuItems = [
-        { name: '대시보드', icon: '🏠', href: '/dashboard' },
-        { name: '구독신청', icon: '📝', href: '/dashboard/apply' },
         { name: '고객관리', icon: '👥', href: '/dashboard/list' },
         { name: '구독료 계산기', icon: '🧮', href: '/dashboard/calculator' },
         { name: '정산관리', icon: '💰', href: '/dashboard/settlement' },
@@ -40,9 +38,9 @@ export default function Sidebar() {
             {/* Desktop Sidebar */}
             <aside className="sidebar-desktop desktop-only">
                 <div style={{ marginBottom: '3rem' }}>
-                    <Link href="/dashboard">
+                    <Link href="/dashboard/list">
                         <img
-                            src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/e840c9a46f66a.png"
+                            src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/5b115594e9a66.png"
                             alt="KCC Logo"
                             style={{ height: '32px', objectFit: 'contain', cursor: 'pointer' }}
                         />
@@ -74,6 +72,53 @@ export default function Sidebar() {
                         );
                     })}
                 </nav>
+ 
+                <div className="sidebar-shortcut-container" style={{ padding: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                    <Link
+                        href="/"
+                        target="_blank"
+                        className="sidebar-shortcut-link"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.75rem 1rem',
+                            borderRadius: '0.625rem',
+                            textDecoration: 'none',
+                            color: 'var(--muted)',
+                            backgroundColor: '#fff',
+                            border: '1px solid var(--border)',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        <span style={{ fontSize: '1.1rem' }}>🌐</span>
+                        <span style={{ lineHeight: 1.2 }}>파트너를 위한<br />구독솔루션 안내</span>
+                    </Link>
+                    <Link
+                        href="/guide"
+                        target="_blank"
+                        className="sidebar-shortcut-link"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.75rem 1rem',
+                            borderRadius: '0.625rem',
+                            textDecoration: 'none',
+                            color: 'var(--muted)',
+                            backgroundColor: '#fff',
+                            border: '1px solid var(--border)',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        <span style={{ fontSize: '1.2rem' }}>📖</span>
+                        <span style={{ lineHeight: 1.2 }}>고객님을 위한<br />구독솔루션 안내</span>
+                    </Link>
+                </div>
 
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -110,7 +155,19 @@ export default function Sidebar() {
                     );
                 })}
             </nav>
+
+            <style jsx>{`
+                .sidebar-shortcut-link:hover {
+                    background-color: var(--muted-light) !important;
+                    border-color: #cbd5e1 !important;
+                    color: var(--primary) !important;
+                }
+                @media (max-width: 1023px) {
+                    .sidebar-shortcut-container {
+                        display: none !important;
+                    }
+                }
+            `}</style>
         </>
     );
 }
-

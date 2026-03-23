@@ -229,12 +229,15 @@ section {
   display: flex;
   background: #F9FAFB;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .dashboard-main {
   flex: 1;
   padding: 1.5rem;
   width: 100%;
+  min-width: 0;
   margin-bottom: 70px;
   /* Space for mobile nav */
 }
@@ -622,7 +625,17 @@ section {
   .mobile-scroll td {
     padding: 0.5rem 0.4rem !important;
     font-size: 0.75rem !important;
-    white-space: nowrap !important;
+  }
+
+  .mobile-scroll {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .mobile-scroll::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Webkit */
   }
 
   /* Hide less important columns on mobile */

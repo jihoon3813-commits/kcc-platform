@@ -7,13 +7,19 @@ export default function DashboardCalculator() {
     const [amount, setAmount] = useState(15000000);
     const [months, setMonths] = useState(60);
 
-    const annualRate = 0.112; // 연이율 11.2%
-    const monthlyRate = annualRate / 12;
+    const interestRates: { [key: number]: number } = {
+        24: 0.167,
+        36: 0.176,
+        48: 0.205,
+        60: 0.240
+    };
 
-    // 원리금 균등 상환 공식: A = P * { r(1+r)^n / ((1+r)^n - 1) }
-    const rawMonthlyPayment = amount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+    const interestRate = interestRates[months] || 0;
+    const rawMonthlyPayment = months > 0 
+        ? Math.floor(amount / (months * (1 - interestRate))) 
+        : 0;
+
     const monthlyPayment = Math.floor(rawMonthlyPayment / 100) * 100; // 100원 단위 절삭
-
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/,/g, '');
         if (!isNaN(Number(value))) {
@@ -66,7 +72,7 @@ export default function DashboardCalculator() {
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>구독 기간 (개월)</label>
                             <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                                {[12, 24, 36, 48, 60].map((m) => (
+                                {[24, 36, 48, 60].map((m) => (
                                     <button
                                         key={m}
                                         onClick={() => setMonths(m)}
@@ -101,7 +107,7 @@ export default function DashboardCalculator() {
                             </p>
                         </div>
                         <p style={{ fontSize: '0.9rem', color: 'var(--muted)', textAlign: 'right' }}>
-                            ※구독료는 일시불 금액 기준 연 11.2%(원리금균등상환) 이자를 포함한 금액입니다.
+                            ※ 위 산출된 구독료는 월 약 {(interestRate / months * 100).toFixed(1)}% 이자가 적용된 예상 금액입니다.
                         </p>
                     </div>
                 </div>

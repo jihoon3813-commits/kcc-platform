@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -8,7 +8,42 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [autoLogging, setAutoLogging] = useState(false);
     const router = useRouter();
+
+    const handleAutoLogin = async (id: string) => {
+        setAutoLogging(true);
+        try {
+            const response = await fetch('/api/proxy', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'adminLoginAsPartner',
+                    id: id
+                })
+            });
+            const data = await response.json();
+            if (data.result === 'success') {
+                localStorage.setItem('kcc_partner', JSON.stringify(data.partner));
+                router.push('/dashboard/list');
+            } else {
+                setError(data.message || '로그인 정보가 올바르지 않습니다.');
+            }
+        } catch (err) {
+            console.error(err);
+            setError('서버 연결에 실패했습니다. 다시 시도해 주세요.');
+        } finally {
+            setAutoLogging(false);
+        }
+    };
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        const auto = params.get('auto');
+        if (id && auto === 'true') {
+            handleAutoLogin(id);
+        }
+    }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +65,7 @@ export default function LoginPage() {
             if (data.result === 'success') {
                 // Save partner info to localStorage
                 localStorage.setItem('kcc_partner', JSON.stringify(data.partner));
-                router.push('/dashboard');
+                router.push('/dashboard/list');
             } else {
                 setError(data.message || '로그인 정보가 올바르지 않습니다.');
             }
@@ -64,7 +99,7 @@ export default function LoginPage() {
             }}>
                 <div style={{ textAlign: 'center' }}>
                     <img
-                        src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/e840c9a46f66a.png"
+                        src="https://cdn.imweb.me/upload/S20250904697320f4fd9ed/5b115594e9a66.png"
                         alt="KCC Logo"
                         style={{ height: '40px', marginBottom: '1.5rem' }}
                     />
@@ -152,7 +187,7 @@ export default function LoginPage() {
                                 phone: '010-1234-5678',
                                 region: '전국'
                             }));
-                            router.push('/dashboard');
+                            router.push('/dashboard/list');
                         }}
                         style={{
                             width: '100%',
@@ -181,6 +216,35 @@ export default function LoginPage() {
                     </p>
                 </div>
             </div>
+            {autoLogging && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 9999,
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '3px solid #e2e8f0',
+                        borderTopColor: '#0046AD',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#1e293b' }}>권한 확인 중...</p>
+                    <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#64748b' }}>본사 관리자 권한으로 파트너 어드민에 접속합니다.</p>
+                </div>
+            )}
+            <style jsx global>{`
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }
