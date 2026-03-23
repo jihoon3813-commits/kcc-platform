@@ -2,7 +2,7 @@
 
 import Sidebar from '@/components/Sidebar';
 import AdminSidebar from '@/components/AdminSidebar';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 interface ManualStep {
     step: string;
@@ -16,6 +16,7 @@ interface ManualStep {
 export default function PartnerManualPage() {
     const isAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     const steps: ManualStep[] = [
         {
@@ -284,7 +285,7 @@ export default function PartnerManualPage() {
                                             {item.images && item.images.length > 0 && (
                                                 <div style={{ marginTop: '1rem', position: 'relative' }}>
                                                     <div style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '0.5rem 0.5rem 0 0', borderBottom: 'none', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <span>{item.actor === '고객' ? '📱 모바일 화면 예시' : '🖥️ 시스템 화면 예시'}</span>
+                                                        <span>{item.actor === '고객' ? '📱 모바일 화면 예시 (클릭하여 확대)' : '🖥️ 시스템 화면 예시 (클릭하여 확대)'}</span>
                                                         {item.images.length > 1 && (
                                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                                 <button onClick={() => handleScroll('left')} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '4px', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}>◀</button>
@@ -298,7 +299,8 @@ export default function PartnerManualPage() {
                                                             <img 
                                                                 src={item.images[0]} 
                                                                 alt={`Step ${item.step} Screenshot`}
-                                                                style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'block' }}
+                                                                style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'block', cursor: 'zoom-in' }}
+                                                                onClick={() => setSelectedImage(item.images![0])}
                                                             />
                                                         </div>
                                                     ) : (
@@ -330,8 +332,10 @@ export default function PartnerManualPage() {
                                                                             height: 'auto', 
                                                                             maxHeight: '450px', 
                                                                             objectFit: 'contain',
-                                                                            display: 'block' 
+                                                                            display: 'block',
+                                                                            cursor: 'zoom-in'
                                                                         }}
+                                                                        onClick={() => setSelectedImage(imgUrl)}
                                                                     />
                                                                     <div style={{ padding: '0.5rem', fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center', background: '#f8fafc' }}>
                                                                         {imgIdx + 1} / {item.images?.length || 0}
@@ -351,6 +355,57 @@ export default function PartnerManualPage() {
                     <div style={{ height: '4rem' }}></div>
                 </div>
             </main>
+
+            {/* Image Zoom Modal */}
+            {selectedImage && (
+                <div 
+                    style={{ 
+                        position: 'fixed', 
+                        top: 0, 
+                        left: 0, 
+                        width: '100vw', 
+                        height: '100vh', 
+                        backgroundColor: 'rgba(0,0,0,0.85)', 
+                        zIndex: 9999, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        cursor: 'zoom-out',
+                        padding: '2rem'
+                    }}
+                    onClick={() => setSelectedImage(null)}
+                >
+                    <div style={{ position: 'relative', maxWidth: '100%', maxHeight: '100%' }}>
+                        <img 
+                            src={selectedImage} 
+                            alt="Full Size" 
+                            style={{ 
+                                display: 'block', 
+                                maxWidth: '100vw', 
+                                maxHeight: '90vh', 
+                                borderRadius: '4px',
+                                boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
+                            }} 
+                        />
+                        <button 
+                            style={{ 
+                                position: 'absolute', 
+                                top: '-40px', 
+                                right: '0', 
+                                background: 'transparent', 
+                                border: 'none', 
+                                color: 'white', 
+                                fontSize: '24px', 
+                                cursor: 'pointer',
+                                fontWeight: 'bold'
+                            }}
+                            onClick={() => setSelectedImage(null)}
+                        >
+                            ✕ 닫기
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <style jsx>{`
                 .horizontal-scroll {
