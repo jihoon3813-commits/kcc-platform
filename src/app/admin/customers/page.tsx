@@ -197,7 +197,7 @@ const DocItemKeyed = ({ docName, label, documents, uploading, onUpload, onDelete
     );
 };
 
-const CustomerDetailModal = ({ customer, onClose, onUpdate, mode = 'customer', isGuest = false }: { customer: Customer; onClose: () => void; onUpdate: () => void; mode?: 'customer' | 'settlement', isGuest?: boolean }) => {
+const CustomerDetailModal = ({ customer, onClose, onUpdate, mode = 'customer', isGuest = false }: { customer: Customer; onClose: () => void; onUpdate: (c: Customer) => void; mode?: 'customer' | 'settlement', isGuest?: boolean }) => {
     const [status, setStatus] = useState<Status>(customer.status);
     const [remarks, setRemarks] = useState(customer.remarks || '');
     const [documents, setDocuments] = useState<Record<string, AuditDocument>>(customer.documents || {});
@@ -349,7 +349,7 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate, mode = 'customer', i
             });
             if (response.ok) {
                 alert('고객 정보가 삭제되었습니다.');
-                onUpdate();
+                onUpdate(customer);
                 onClose();
             } else throw new Error('Delete failed');
         } catch (err) {
@@ -394,7 +394,22 @@ const CustomerDetailModal = ({ customer, onClose, onUpdate, mode = 'customer', i
                     throw new Error(resData.message || 'Back-end save failed');
                 }
                 alert('변경사항이 저장되었습니다.');
-                onUpdate();
+                onUpdate({
+                    ...customer,
+                    status: status,
+                    remarks: remarks,
+                    documents: documents,
+                    name: editData.name,
+                    phone: editData.phone,
+                    amount: editData.amount,
+                    downPayment: editData.downPayment,
+                    address: editData.address,
+                    months: editData.months,
+                    transferDate: editData.transferDate,
+                    birthDate: editData.birthDate,
+                    constructionDate: editData.constructionDate,
+                    ownershipType: editData.ownershipType,
+                });
                 onClose();
             } else {
                 const errData = await response.json().catch(() => ({}));
@@ -769,12 +784,25 @@ function AdminCustomerListContent() {
                         constructionDate: findVal(['시공예정일', '시공일', 'constructionDate']) || '',
                         statusUpdatedAt: findVal(['상태변경일', 'statusUpdatedAt']) || (item._creationTime ? new Date(item._creationTime).toISOString().split('T')[0] : (findVal(['접수일', 'date']) || '').toString().split('T')[0]),
                         documents: docsJson ? (typeof docsJson === 'string' ? JSON.parse(docsJson) : docsJson) : {},
-                        isGuest: !!item.isGuest
+                        isGuest: !!item.isGuest,
+                        createdAt: Number(item._creationTime || 0),
+                        updatedAt: item.updatedAt ? (typeof item.updatedAt === 'string' ? new Date(item.updatedAt).getTime() : Number(item.updatedAt)) : 0,
+                        lastUpdateType: item.lastUpdateType,
                     };
                 });
+                
+                // Debug log to see if any updated items are coming back with new timestamps
+                const updatedItemsTemp = mappedData.filter(m => m.updatedAt > 0);
+                if (updatedItemsTemp.length > 0) {
+                    console.log('Detected items with updatedAt timestamps:', updatedItemsTemp.length);
+                }
+                
                 const sorted = mappedData.sort((a: any, b: any) => {
-                    const dateA = a.date !== '-' ? new Date(a.date).getTime() : 0;
-                    const dateB = b.date !== '-' ? new Date(b.date).getTime() : 0;
+                    const timeA = Math.max(a.updatedAt || 0, a.createdAt || 0, (a.date && a.date !== '-') ? new Date(a.date).getTime() : 0);
+                    const timeB = Math.max(b.updatedAt || 0, b.createdAt || 0, (b.date && b.date !== '-') ? new Date(b.date).getTime() : 0);
+                    if (timeA !== timeB) return timeB - timeA;
+                    const dateA = (a.date && a.date !== '-') ? new Date(a.date).getTime() : 0;
+                    const dateB = (b.date && b.date !== '-') ? new Date(b.date).getTime() : 0;
                     if (dateA !== dateB) return dateB - dateA;
                     return String(b.id || "").localeCompare(String(a.id || ""));
                 });
@@ -831,6 +859,33 @@ function AdminCustomerListContent() {
         });
         setFilteredCustomers(filtered);
     }, [searchTerm, filterStatus, filterPartner, datePreset, startDate, endDate, customers]);
+
+    const renderLabels = (c: any) => {
+        const now = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+        
+        const updatedAt = typeof c.updatedAt === 'string' ? new Date(c.updatedAt).getTime() : Number(c.updatedAt || 0);
+        const createdAt = typeof c.createdAt === 'string' ? new Date(c.createdAt).getTime() : Number(c.createdAt || 0);
+        
+        const isNew = createdAt ? (now - createdAt < oneDay) : false;
+        const isUpdatedRecently = updatedAt && (now - updatedAt < oneDay);
+
+        if (isUpdatedRecently && c.lastUpdateType && c.lastUpdateType !== 'new') {
+            // Priority: show only the last specific label. If multiple, status takes precedence as it's more definitive.
+            if (c.lastUpdateType.includes('status')) {
+                return <span key="status" style={{ background: '#f59e0b', color: 'white', padding: '0.15rem 0.35rem', borderRadius: '0.2rem', fontSize: '0.65rem', fontWeight: 800, marginLeft: '0.4rem', whiteSpace: 'nowrap', verticalAlign: 'middle', letterSpacing: '-0.02em', display: 'inline-block', lineHeight: 1 }}>상태변경</span>;
+            }
+            if (c.lastUpdateType.includes('info')) {
+                return <span key="info" style={{ background: '#3b82f6', color: 'white', padding: '0.15rem 0.35rem', borderRadius: '0.2rem', fontSize: '0.65rem', fontWeight: 800, marginLeft: '0.4rem', whiteSpace: 'nowrap', verticalAlign: 'middle', letterSpacing: '-0.02em', display: 'inline-block', lineHeight: 1 }}>정보변경</span>;
+            }
+        } 
+        
+        if (isNew || (isUpdatedRecently && c.lastUpdateType === 'new')) {
+            return <span key="new" style={{ background: '#ef4444', color: 'white', padding: '0.15rem 0.35rem', borderRadius: '0.2rem', fontSize: '0.65rem', fontWeight: 800, marginLeft: '0.4rem', whiteSpace: 'nowrap', verticalAlign: 'middle', letterSpacing: '-0.02em', display: 'inline-block', lineHeight: 1 }}>NEW</span>;
+        }
+
+        return null;
+    };
 
     return (
         <div className="admin-page-wrapper" style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc', color: '#1e293b', overflowX: 'hidden', width: '100%' }}>
@@ -1059,7 +1114,12 @@ function AdminCustomerListContent() {
                                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                             >
                                                 <td style={{ padding: '1.25rem 1rem', color: '#64748b', whiteSpace: 'nowrap' }}>{c.date}</td>
-                                                <td style={{ padding: '1.25rem 1rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap' }}>{c.name}</td>
+                                                <td style={{ padding: '1.25rem 1rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                        {c.name}
+                                                        {renderLabels(c as any)}
+                                                    </div>
+                                                </td>
                                                 <td style={{ padding: '1.25rem 1rem', whiteSpace: 'nowrap' }}>{c.phone}</td>
                                                 <td style={{ padding: '1.25rem 1rem', color: '#3b82f6', fontWeight: 900, whiteSpace: 'nowrap' }}>{c.partnerName}</td>
                                                 <td style={{ padding: '1.25rem 1rem', color: '#64748b', whiteSpace: 'nowrap' }}>{c.birthDate}</td>
@@ -1171,8 +1231,10 @@ function AdminCustomerListContent() {
                     mode="customer"
                     isGuest={(selectedCustomer as any).isGuest || false}
                     onClose={() => setSelectedCustomer(null)} 
-                    onUpdate={() => {
-                        fetchAllCustomers();
+                    onUpdate={async (updated: Customer) => {
+                        // Proactively update local state for immediate feedback
+                        setCustomers(prev => prev.map(c => c.id === updated.id ? { ...c, ...updated, updatedAt: Date.now(), lastUpdateType: 'status' } : c));
+                        await fetchAllCustomers();
                         setSelectedCustomer(null);
                     }} 
                 />

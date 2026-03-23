@@ -41,4 +41,7 @@ export interface Customer {
     settlement2Amount?: string;
     partnerName?: string;
     createdAt?: number;
+    updatedAt?: number;
+    lastUpdateType?: string;
+    isGuest?: boolean;
 }

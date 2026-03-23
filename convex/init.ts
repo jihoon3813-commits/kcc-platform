@@ -189,3 +189,84 @@ export const seedLots = mutation({
     return "Seed Lots complete.";
   }
 });
+
+export const setTemplates = mutation({
+  handler: async (ctx) => {
+    const templates = {
+        customer_registration: `[KCC 구독센터 알림]
+#{고객명}님 KCC홈씨씨 구독 신청 감사드립니다.
+
+아래 링크를 클릭하셔서
+
+#{전용URL}
+
+1. 신청 내용 확인
+2. 신용 조회 동의
+3. 필수 서류 등록
+을 꼭 진행해 주세요.
+
+구독센터에서 진행 가능여부를 확인해서 고객님께 전화 안내드릴 예정입니다.
+
+감사합니다.`,
+        status_agreed: `[KCC 구독센터 알림]
+#{고객명}님의 신청 상태가 <신용동의완료>로 변경되었습니다.
+
+구독 계약을 위해 서류 심사가 진행될 예정입니다.
+
+감사합니다.`,
+        status_completed: `[KCC 구독센터 알림]
+#{고객명}님의 상태가 <계약완료>로 변경되었습니다.
+
+시공 일정이 확정되면 안내드리겠습니다.
+
+감사합니다.`,
+        status_failed: `[KCC 구독센터 알림]
+#{고객명}님, 죄송합니다. 내부 심사 기준에 따라 이번 신청은 <진행불가> 처리되었습니다.
+
+자세한 내용은 고객센터로 문의 바랍니다.`,
+        status_canceled: `[KCC 구독센터 알림]
+#{고객명}님의 구독 신청이 <계약취소> 되었습니다.`,
+        status_construction: `[KCC 구독센터 알림]
+#{고객명}님, 시공 전 필요한 <시공자료> 제출을 요청드립니다.`,
+        status_recording: `[KCC 구독센터 알림]
+#{고객명}님의 상태가 <녹취완료>로 변경되었습니다.
+
+고객님의 녹취계약 진행이 완료되면 +3영업일 이내 대금 정산이 이루어집니다.
+
+감사합니다.`,
+        status_settlement1: `[KCC 구독센터 알림]
+#{고객명}님의 상태가 <1차정산완료>로 변경되었습니다.
+
+고객님의 구독계약이 정상 진행되어 구독 실행 원금의 50%가 지급 되었습니다.
+
+감사합니다.`,
+        status_settlement2: `[KCC 구독센터 알림]
+#{고객명}님의 상태가 <최종정산완료>로 변경되었습니다.
+
+고객님의 녹취계약이 정상 진행되어 구독 실행 잔금이 모두 지급 되었습니다.
+
+감사합니다.`
+    };
+    
+    // Update templates
+    const existingTemplates: any = await ctx.db.query("settings").withIndex("by_key", q => q.eq("key", "sms_templates")).first();
+    if (existingTemplates) {
+        await ctx.db.patch(existingTemplates._id, { value: templates });
+    } else {
+        await ctx.db.insert("settings", { key: "sms_templates", value: templates });
+    }
+
+    // Update Aligo Config baseUrl
+    const existingAligo: any = await ctx.db.query("settings").withIndex("by_key", q => q.eq("key", "aligo_config")).first();
+    const aligoValue = existingAligo?.value || {};
+    aligoValue.baseUrl = "https://kcc-subscribe.vercel.app";
+    if (existingAligo) {
+        await ctx.db.patch(existingAligo._id, { value: aligoValue });
+    } else {
+        await ctx.db.insert("settings", { key: "aligo_config", value: aligoValue });
+    }
+
+    return "Templates and Config updated.";
+  }
+});
+

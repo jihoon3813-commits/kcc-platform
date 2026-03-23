@@ -73,7 +73,11 @@ export async function GET(request: Request) {
             }
         }
 
-        return NextResponse.json(data);
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': 'no-store, max-age=0, must-revalidate',
+            }
+        });
     } catch (error: any) {
         console.error('Convex GET Proxy Error:', error);
         return NextResponse.json({ 

@@ -149,8 +149,8 @@ export const sendRegistrationSms = internalAction({
     }
 
     // 3. Replace variables with flexible regex
-    const baseUrl = (aligoConfig.baseUrl || "https://kcc-platform-delta.vercel.app").replace(/\/$/, "");
-    const applyUrl = `${baseUrl}/apply/${customer.id}`;
+    const baseUrl = (aligoConfig.baseUrl || "https://kcc-subscribe.vercel.app").replace(/\/$/, "");
+    const applyUrl = `${baseUrl}/customer/${customer.id}`;
 
     message = message.replace(/#\{\s*고객명\s*\}/g, customer.name || "");
     message = message.replace(/#\{\s*파트너명\s*\}/g, customer.partnerName || "");

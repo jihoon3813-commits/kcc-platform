@@ -10,6 +10,7 @@ export default function Sidebar() {
         { name: '고객관리', icon: '👥', href: '/dashboard/list' },
         { name: '구독료 계산기', icon: '🧮', href: '/dashboard/calculator' },
         { name: '정산관리', icon: '💰', href: '/dashboard/settlement' },
+        { name: '매뉴얼', icon: '📖', href: '/dashboard/manual' },
         { name: '파트너', icon: '👤', href: '/dashboard/profile' },
     ];
 

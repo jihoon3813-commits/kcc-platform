@@ -1,25 +1,33 @@
 import { mutation } from "./_generated/server";
 
-export const migrateStatus = mutation({
-  args: {},
+export const fixTimestamps = mutation({
   handler: async (ctx) => {
-    const customers = await ctx.db.query("customers").collect();
     let count = 0;
-    for (const customer of customers) {
-      if (customer.status === "녹취진행") {
-        await ctx.db.patch(customer._id, { status: "녹취완료" });
-        count++;
+    
+    // Fix regular customers
+    const customers = await ctx.db.query("customers").collect();
+    for (const c of customers) {
+      if (typeof c.updatedAt === 'string') {
+        const timestamp = new Date(c.updatedAt).getTime();
+        if (!isNaN(timestamp)) {
+          await ctx.db.patch(c._id, { updatedAt: timestamp });
+          count++;
+        }
       }
     }
-
+    
+    // Fix guest customers
     const guestCustomers = await ctx.db.query("guest_customers").collect();
-    for (const customer of guestCustomers) {
-      if (customer.status === "녹취진행") {
-        await ctx.db.patch(customer._id, { status: "녹취완료" });
-        count++;
+    for (const gc of guestCustomers) {
+      if (typeof gc.updatedAt === 'string') {
+        const timestamp = new Date(gc.updatedAt).getTime();
+        if (!isNaN(timestamp)) {
+          await ctx.db.patch(gc._id, { updatedAt: timestamp });
+          count++;
+        }
       }
     }
-
-    return { result: "success", updatedCount: count };
-  },
+    
+    return { result: "success", correctedCount: count };
+  }
 });

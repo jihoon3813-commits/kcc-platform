@@ -120,6 +120,8 @@ export const createCustomer = mutation({
       partnerId: args.partnerId || "admin",
       constructionDate: args.constructionDate || "",
       statusUpdatedAt: new Date().toISOString().split('T')[0],
+      updatedAt: Date.now(),
+      lastUpdateType: "new",
     });
     
     // Trigger Registration SMS to Customer
@@ -193,6 +195,9 @@ export const updateCustomer = mutation({
     }
     
     const patch: any = {};
+    let statusChanged = false;
+    let infoChanged = false;
+
     if (args.status !== undefined) {
       const statusOrder = ['등록완료', '신용동의', '계약완료', '진행불가', '계약취소', '시공자료요청', '녹취완료', '1차정산완료', '최종정산완료'];
       const oldIdx = statusOrder.indexOf(customer.status || '등록완료');
@@ -209,6 +214,7 @@ export const updateCustomer = mutation({
       } else if (args.status !== customer.status) {
         patch.status = args.status;
         patch.statusUpdatedAt = nowStr;
+        statusChanged = true;
         
         // Capture specific success dates
         if (args.status === '계약완료' && !customer.contractDate) {
@@ -220,25 +226,49 @@ export const updateCustomer = mutation({
       }
     }
     
-    if (args.remarks !== undefined) patch.remarks = args.remarks;
-    if (args.docs_json !== undefined) patch.docs_json = args.docs_json;
-    if (args.customerName !== undefined) patch.name = args.customerName;
-    if (args.phone !== undefined) patch.phone = args.phone;
-    if (args.birthDate !== undefined) patch.birthDate = args.birthDate;
-    if (args.address !== undefined) patch.address = args.address;
-    if (args.amount !== undefined) patch.amount = args.amount;
-    if (args.downPayment !== undefined) patch.downPayment = args.downPayment;
-    if (args.months !== undefined) patch.months = args.months;
-    if (args.transferDate !== undefined) patch.transferDate = args.transferDate;
-    if (args.ownershipType !== undefined) patch.ownershipType = args.ownershipType;
-    if (args.constructionDate !== undefined) patch.constructionDate = args.constructionDate;
-    if (args.statusUpdatedAt !== undefined) patch.statusUpdatedAt = args.statusUpdatedAt;
-    if (args.settlement1Date !== undefined) patch.settlement1Date = args.settlement1Date;
-    if (args.settlement1Amount !== undefined) patch.settlement1Amount = args.settlement1Amount;
-    if (args.settlement2Date !== undefined) patch.settlement2Date = args.settlement2Date;
-    if (args.settlement2Amount !== undefined) patch.settlement2Amount = args.settlement2Amount;
+    const checkInfoChange = (argVal: any, dbVal: any, fieldName: string) => {
+        if (argVal !== undefined && argVal !== dbVal) {
+            patch[fieldName] = argVal;
+            infoChanged = true;
+        }
+    };
+
+    checkInfoChange(args.remarks, customer.remarks, "remarks");
+    checkInfoChange(args.docs_json, customer.docs_json, "docs_json");
+    checkInfoChange(args.customerName, customer.name, "name");
+    checkInfoChange(args.phone, customer.phone, "phone");
+    checkInfoChange(args.birthDate, customer.birthDate, "birthDate");
+    checkInfoChange(args.address, customer.address, "address");
+    checkInfoChange(args.amount, customer.amount, "amount");
+    checkInfoChange(args.downPayment, customer.downPayment, "downPayment");
+    checkInfoChange(args.months, customer.months, "months");
+    checkInfoChange(args.transferDate, customer.transferDate, "transferDate");
+    checkInfoChange(args.ownershipType, customer.ownershipType, "ownershipType");
+    checkInfoChange(args.constructionDate, customer.constructionDate, "constructionDate");
     
-    await ctx.db.patch(customer._id, patch);
+    // Some fields map differently or don't trigger info changed heavily, but we wrap them.
+    if (args.statusUpdatedAt !== undefined && args.statusUpdatedAt !== customer.statusUpdatedAt && !statusChanged) {
+        // If only date is forced? Let's just patch it.
+        patch.statusUpdatedAt = args.statusUpdatedAt;
+    }
+    
+    checkInfoChange(args.settlement1Date, customer.settlement1Date, "settlement1Date");
+    checkInfoChange(args.settlement1Amount, customer.settlement1Amount, "settlement1Amount");
+    checkInfoChange(args.settlement2Date, customer.settlement2Date, "settlement2Date");
+    checkInfoChange(args.settlement2Amount, customer.settlement2Amount, "settlement2Amount");
+    
+    if (statusChanged || infoChanged) {
+        patch.updatedAt = Date.now();
+        const types = [];
+        if (statusChanged) types.push("status");
+        if (infoChanged) types.push("info");
+        patch.lastUpdateType = types.join(",");
+        
+        console.log(`Updating customer ${customer.id}: patch=`, JSON.stringify(patch));
+        await ctx.db.patch(customer._id, patch);
+    } else {
+        console.log(`No material changes for customer ${customer.id}`);
+    }
 
     // Trigger SMS if status changed
     if (patch.status && patch.status !== customer.status) {

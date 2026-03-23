@@ -29,6 +29,9 @@ export default defineSchema({
     settlement2Amount: v.optional(v.string()),
     partnerName: v.string(),
     partnerId: v.string(),
+    updatedAt: v.optional(v.union(v.number(), v.string())), // Can be string (old) or number (new)
+    lastUpdateType: v.optional(v.string()), // comma separated: 'status', 'info'
+    infoUpdatedAt: v.optional(v.string()), // Missing field causing validation error
   }).index("by_custom_id", ["id"]).index("by_partner", ["partnerId"]),
 
   guest_customers: defineTable({
@@ -57,6 +60,9 @@ export default defineSchema({
     settlement2Amount: v.optional(v.string()),
     partnerName: v.string(),
     partnerId: v.string(),
+    updatedAt: v.optional(v.union(v.number(), v.string())), // Can be string (old) or number (new)
+    lastUpdateType: v.optional(v.string()), // comma separated: 'status', 'info'
+    infoUpdatedAt: v.optional(v.string()), // Missing field causing validation error
   }).index("by_custom_id", ["id"]).index("by_partner", ["partnerId"]),
 
   partners: defineTable({

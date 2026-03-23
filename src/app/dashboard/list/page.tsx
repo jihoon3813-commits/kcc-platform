@@ -114,11 +114,21 @@ export default function CustomerList() {
                         remarks: item.remarks || findVal(['비고']) || '',
                         ownershipType: item.ownershipType || findVal(['주택소유']) || '미지정',
                         documents: item.docs_json ? (typeof item.docs_json === 'string' ? JSON.parse(item.docs_json) : item.docs_json) : (item.documents || {}),
-                        createdAt: item._creationTime || 0
+                        createdAt: Number(item._creationTime || 0),
+                        updatedAt: item.updatedAt ? (typeof item.updatedAt === 'string' ? new Date(item.updatedAt).getTime() : Number(item.updatedAt)) : 0,
+                        lastUpdateType: item.lastUpdateType,
                     };
                 });
 
-                const sortedData = mappedData.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                const sortedData = mappedData.sort((a, b) => {
+                    const timeA = Math.max(a.updatedAt || 0, a.createdAt || 0);
+                    const timeB = Math.max(b.updatedAt || 0, b.createdAt || 0);
+                    if (timeA !== timeB) return timeB - timeA;
+                    const dateA = (a.date && a.date !== '-') ? new Date(a.date).getTime() : 0;
+                    const dateB = (b.date && b.date !== '-') ? new Date(b.date).getTime() : 0;
+                    if (dateA !== dateB) return dateB - dateA;
+                    return String(b.id || "").localeCompare(String(a.id || ""));
+                });
                 setCustomers(sortedData);
             } else {
                 setCustomers([]);
@@ -174,7 +184,33 @@ export default function CustomerList() {
         return matchesSearch && matchesStatus && matchesDate;
     });
 
-    // Removed getStatusBadge from here to move it outside
+    // rendering logic
+    const renderLabels = (c: any) => {
+        const now = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+        
+        const updatedAt = typeof c.updatedAt === 'string' ? new Date(c.updatedAt).getTime() : Number(c.updatedAt || 0);
+        const createdAt = typeof c.createdAt === 'string' ? new Date(c.createdAt).getTime() : Number(c.createdAt || 0);
+        
+        const isNew = createdAt ? (now - createdAt < oneDay) : false;
+        const isUpdatedRecently = updatedAt && (now - updatedAt < oneDay);
+
+        if (isUpdatedRecently && c.lastUpdateType && c.lastUpdateType !== 'new') {
+            // Priority: show only the last specific label. If multiple, status takes precedence as it's more definitive.
+            if (c.lastUpdateType.includes('status')) {
+                return <span key="status" style={{ background: '#f59e0b', color: 'white', padding: '0.15rem 0.35rem', borderRadius: '0.2rem', fontSize: '0.65rem', fontWeight: 800, marginLeft: '0.4rem', whiteSpace: 'nowrap', verticalAlign: 'middle', letterSpacing: '-0.02em', display: 'inline-block', lineHeight: 1 }}>상태변경</span>;
+            }
+            if (c.lastUpdateType.includes('info')) {
+                return <span key="info" style={{ background: '#3b82f6', color: 'white', padding: '0.15rem 0.35rem', borderRadius: '0.2rem', fontSize: '0.65rem', fontWeight: 800, marginLeft: '0.4rem', whiteSpace: 'nowrap', verticalAlign: 'middle', letterSpacing: '-0.02em', display: 'inline-block', lineHeight: 1 }}>정보변경</span>;
+            }
+        } 
+        
+        if (isNew || (isUpdatedRecently && c.lastUpdateType === 'new')) {
+            return <span key="new" style={{ background: '#ef4444', color: 'white', padding: '0.15rem 0.35rem', borderRadius: '0.2rem', fontSize: '0.65rem', fontWeight: 800, marginLeft: '0.4rem', whiteSpace: 'nowrap', verticalAlign: 'middle', letterSpacing: '-0.02em', display: 'inline-block', lineHeight: 1 }}>NEW</span>;
+        }
+
+        return null;
+    };
 
 
     return (
@@ -519,7 +555,12 @@ export default function CustomerList() {
                                             className="hover-row"
                                         >
                                             <td style={{ padding: '1rem', color: '#64748b', whiteSpace: 'nowrap' }}>{app.date}</td>
-                                            <td style={{ padding: '1rem', fontWeight: 700, whiteSpace: 'nowrap' }}>{app.name}</td>
+                                            <td style={{ padding: '1rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    {app.name}
+                                                    {renderLabels(app as any)}
+                                                </div>
+                                            </td>
                                             <td style={{ padding: '1rem', color: '#475569', whiteSpace: 'nowrap' }}>{app.phone}</td>
                                             <td style={{ padding: '1rem', color: '#64748b', whiteSpace: 'nowrap' }}>{app.birthDate}</td>
                                             <td style={{
@@ -567,7 +608,10 @@ export default function CustomerList() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.25rem' }}>
                                         <div style={{ flex: 1 }}>
                                             <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>신청일: {app.date}</span>
-                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginTop: '0.25rem' }}>{app.name}</h3>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginTop: '0.25rem', display: 'flex', alignItems: 'center' }}>
+                                                {app.name}
+                                                {renderLabels(app as any)}
+                                            </h3>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                                             {getStatusBadge(app.status, app.statusUpdatedAt)}
@@ -627,9 +671,11 @@ export default function CustomerList() {
                     customer={selectedCustomer}
                     isGuest={isGuest}
                     onClose={() => setSelectedCustomer(null)}
-                    onUpdate={(updated) => {
-                        setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
-                        setSelectedCustomer(updated);
+                    onUpdate={async (updated) => {
+                        // Proactive update for instant label change
+                        setCustomers(prev => prev.map(c => c.id === updated.id ? { ...c, ...updated, updatedAt: Date.now(), lastUpdateType: 'status' } : c));
+                        await fetchCustomers();
+                        setSelectedCustomer(null);
                     }}
                 />
             )}
