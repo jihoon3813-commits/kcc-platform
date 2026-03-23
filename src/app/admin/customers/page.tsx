@@ -698,6 +698,7 @@ function AdminCustomerListContent() {
 
     const fetchAllCustomers = async () => {
         setLoading(true);
+        console.log('Fetching all customers for admin...');
         try {
             const [cRes, gRes, pRes] = await Promise.all([
                 fetch('/api/proxy?type=customers', { cache: 'no-store' }),
@@ -707,6 +708,8 @@ function AdminCustomerListContent() {
             const cData = await cRes.json();
             const gData = await gRes.json();
             const pData = await pRes.json();
+
+            console.log('Raw data counts:', { customers: Array.isArray(cData) ? cData.length : 'error', guest: Array.isArray(gData) ? gData.length : 'error' });
 
             // Merge customers and guest_customers
             const data = [...(Array.isArray(cData) ? cData : []), ...(Array.isArray(gData) ? gData : [])];
@@ -722,17 +725,14 @@ function AdminCustomerListContent() {
                         const keys = Object.keys(item);
                         const normalizedKeywords = keywords.map(k => k.toLowerCase().replace(/\s/g, ''));
                         
-                        // First pass: try exact match
                         for (const k of keys) {
                             const normalizedK = k.toLowerCase().replace(/\s/g, '');
                             if (normalizedKeywords.includes(normalizedK)) return item[k];
                         }
                         
-                        // Second pass: try includes match for longer names
                         for (const k of keys) {
                             const normalizedK = k.toLowerCase().replace(/\s/g, '');
                             for (const key of normalizedKeywords) {
-                                // Prevent 'date' matching 'birthdate'
                                 if (key === 'date' && normalizedK.includes('birth')) continue;
                                 if (normalizedK.includes(key)) return item[k];
                             }
@@ -740,15 +740,15 @@ function AdminCustomerListContent() {
                         return null;
                     };
 
-                    const docsJson = findVal(['documents', '서류', '서류관리', '서류JSON']);
-                    const birthDateRaw = findVal(['생년월일', 'birthDate']) || '-';
-                    const birthDate = (birthDateRaw.toString().includes('T'))
-                        ? birthDateRaw.toString().split('T')[0]
+                    const docsJson = findVal(['docs_json', 'documents', '서류', '서류JSON']);
+                    const birthDateRaw = (findVal(['생년월일', 'birthDate']) || '-').toString();
+                    const birthDate = (birthDateRaw.includes('T'))
+                        ? birthDateRaw.split('T')[0]
                         : birthDateRaw;
 
                     return {
                         id: item.id || findVal(['고객번호', 'ID', 'id']) || item._id,
-                        date: findVal(['접수일', 'date']) ? findVal(['접수일', 'date']).toString().split('T')[0] : '-',
+                        date: String(findVal(['접수일', 'date']) || '-').split('T')[0],
                         name: findVal(['신청자명', '이름', 'name']) || '이름 없음',
                         phone: findVal(['연락처', 'phone']) || '-',
                         birthDate: birthDate,
@@ -773,11 +773,12 @@ function AdminCustomerListContent() {
                     };
                 });
                 const sorted = mappedData.sort((a: any, b: any) => {
-                    const dateA = new Date(a.date).getTime();
-                    const dateB = new Date(b.date).getTime();
+                    const dateA = a.date !== '-' ? new Date(a.date).getTime() : 0;
+                    const dateB = b.date !== '-' ? new Date(b.date).getTime() : 0;
                     if (dateA !== dateB) return dateB - dateA;
-                    return b.id.toString().localeCompare(a.id.toString());
+                    return String(b.id || "").localeCompare(String(a.id || ""));
                 });
+                console.log('Mapped and sorted customers count:', sorted.length);
                 setCustomers(sorted);
                 setFilteredCustomers(sorted);
             }
