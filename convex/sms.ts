@@ -117,6 +117,79 @@ export const sendStatusSms = internalAction({
   },
 });
 
+export const sendAdminPartnerNotifySms = internalAction({
+  args: { 
+    partnerId: v.string(), 
+  },
+  handler: async (ctx, args) => {
+    // 1. Get Partner Info
+    const partner: any = await ctx.runQuery(api.auth.getPartnerById, { id: args.partnerId });
+    if (!partner) return;
+
+    // 2. Get Aligo Config & Templates
+    const aligoConfig: any = await ctx.runQuery(api.settings.getSetting, { key: "aligo_config" });
+    const templates: any = await ctx.runQuery(api.settings.getSetting, { key: "sms_templates" });
+
+    if (!aligoConfig || !aligoConfig.apiKey || !aligoConfig.userId || !aligoConfig.senderNumber || !aligoConfig.adminPhone) {
+      console.log("Aligo API or Admin Phone not configured properly");
+      return;
+    }
+
+    const templateKey = 'admin_new_partner';
+    let message = "";
+    if (!templates || !templates[templateKey]) {
+      console.log(`No SMS template found for admin notification (key: ${templateKey}). Using default.`);
+      message = "[KCC구독] 신규 파트너 신청이 들어왔습니다.\n업체명: #{파트너명}\n지역: #{시공지역}\n확인 바랍니다.";
+    } else {
+      message = templates[templateKey];
+    }
+
+    // 3. Replace variables
+    message = message.replace(/#\{\s*파트너명\s*\}/g, partner.name || "");
+    message = message.replace(/#\{\s*고객명\s*\}/g, partner.owner || "");
+    message = message.replace(/#\{\s*ID\s*\}/g, partner.id || "");
+    message = message.replace(/#\{\s*시공지역\s*\}/g, partner.region || "");
+
+    console.log(`Sending Admin Notification SMS to: ${aligoConfig.adminPhone}, Message: ${message}`);
+
+    // 4. Call Aligo API
+    try {
+      const receiver = (aligoConfig.adminPhone || "").replace(/[^0-9]/g, "");
+      const formData = new URLSearchParams();
+      formData.set("key", aligoConfig.apiKey);
+      formData.set("user_id", aligoConfig.userId);
+      formData.set("sender", (aligoConfig.senderNumber || "").replace(/[^0-9]/g, ""));
+      formData.set("receiver", receiver);
+      formData.set("msg", message);
+      
+      if (message.length > 80) {
+        formData.set("msg_type", "LMS");
+        formData.set("subject", "[KCC 구독 센터]");
+      }
+
+      const response = await fetch("https://apis.aligo.in/send/", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log("Aligo Admin Notify SMS Result:", result);
+      
+      // Log the result
+      await ctx.runMutation(internal.sms.logSms, {
+        type: "admin_notify",
+        receiver: receiver,
+        message: message,
+        resultCode: String(result.result_code),
+        resultMessage: result.message || (result.result_code === "1" ? "Success" : "Unknown Error"),
+      });
+
+    } catch (error) {
+      console.error("Aligo API Network/Fetch Error:", error);
+    }
+  },
+});
+
 export const sendRegistrationSms = internalAction({
   args: { 
     customerId: v.string(), 

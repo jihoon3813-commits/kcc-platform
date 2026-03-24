@@ -15,13 +15,14 @@ const TEMPLATE_KEYS = [
 ];
 
 export default function SmsSettingsPage() {
-    const [activeTab, setActiveTab] = useState<'partner' | 'customer'>('partner');
+    const [activeTab, setActiveTab] = useState<'partner' | 'customer' | 'admin'>('partner');
     const [templates, setTemplates] = useState<Record<string, string>>({});
     const [smsLogs, setSmsLogs] = useState<any[]>([]);
     const [aligoConfig, setAligoConfig] = useState({
         apiKey: '',
         userId: '',
         senderNumber: '',
+        adminPhone: '',
     });
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -29,6 +30,10 @@ export default function SmsSettingsPage() {
 
     const CUSTOMER_TEMPLATE_KEYS = [
         { id: 'customer_registration', label: '신규 등록 안내', description: '고객이 시스템에 신규 등록되었을 때 고객에게 발송됩니다.' },
+    ];
+
+    const ADMIN_TEMPLATE_KEYS = [
+        { id: 'admin_new_partner', label: '신규 파트너 신청 알림', description: '홈페이지를 통해 새로운 파트너 신청이 들어왔을 때 지정된 관리자 번호로 발송됩니다.' },
     ];
 
     const fetchLogs = async () => {
@@ -258,6 +263,16 @@ export default function SmsSettingsPage() {
                                 placeholder="02-XXX-XXXX"
                             />
                         </div>
+                        <div className="input-group">
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#64748b', marginBottom: '0.5rem' }}>관리자 알림 수신 번호</label>
+                            <input 
+                                type="text"
+                                value={aligoConfig.adminPhone || ''}
+                                onChange={(e) => setAligoConfig({ ...aligoConfig, adminPhone: e.target.value })}
+                                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', outline: 'none' }}
+                                placeholder="010-XXXX-XXXX"
+                            />
+                        </div>
                     </div>
                 </section>
 
@@ -301,21 +316,37 @@ export default function SmsSettingsPage() {
                     >
                         고객 대상 SMS 문구 설정
                     </button>
+                    <button 
+                        onClick={() => setActiveTab('admin')}
+                        style={{
+                            padding: '1rem 1.5rem',
+                            fontSize: '1rem',
+                            fontWeight: 700,
+                            color: activeTab === 'admin' ? '#0046AD' : '#64748b',
+                            borderBottom: activeTab === 'admin' ? '3px solid #0046AD' : '3px solid transparent',
+                            backgroundColor: 'transparent',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            marginBottom: '-1px'
+                        }}
+                    >
+                        관리자 대상 SMS 문구 설정
+                    </button>
                 </div>
 
                 {/* SMS 문구 설정 */}
                 <section>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e293b', margin: 0 }}>
-                            💬 {activeTab === 'partner' ? '파트너' : '고객'} 대상 SMS 문구 설정
+                            💬 {activeTab === 'partner' ? '파트너' : activeTab === 'customer' ? '고객' : '관리자'} 대상 SMS 문구 설정
                         </h2>
                         <div style={{ padding: '0.4rem 0.8rem', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '0.5rem', fontSize: '0.8rem', fontWeight: 600 }}>
-                            가용 변수: #{'{고객명}'}, #{'{파트너명}'}, #{'{ID}'}, {activeTab === 'partner' ? "#{'{최종금액}'}" : "#{'{전용URL}'}"}
+                            가용 변수: #{'{고객명}'}, #{'{파트너명}'}, #{'{ID}'}, {activeTab === 'partner' ? "#{'{최종금액}'}" : activeTab === 'customer' ? "#{'{전용URL}'}" : "#{'{시공지역}'}"}
                         </div>
                     </div>
                     
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
-                        {(activeTab === 'partner' ? TEMPLATE_KEYS : CUSTOMER_TEMPLATE_KEYS).map((t) => (
+                        {(activeTab === 'partner' ? TEMPLATE_KEYS : activeTab === 'customer' ? CUSTOMER_TEMPLATE_KEYS : ADMIN_TEMPLATE_KEYS).map((t) => (
                             <div key={t.id} style={{ 
                                 backgroundColor: 'white', 
                                 padding: '1.5rem', 

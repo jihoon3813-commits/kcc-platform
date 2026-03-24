@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 
 // Partners login
 export const loginPartner = mutation({
@@ -108,6 +109,13 @@ export const createPartner = mutation({
       status: status,
       origin: origin || "admin"
     });
+
+    // Send notification to admin if it's a new request from website
+    if (origin === 'request') {
+      await ctx.scheduler.runAfter(0, internal.sms.sendAdminPartnerNotifySms, {
+        partnerId: args.id
+      });
+    }
     
     return { result: "success" };
   },
