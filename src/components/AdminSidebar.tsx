@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -8,7 +8,6 @@ const menuItems = [
     { name: '대시보드', path: '/admin', icon: '📊' },
     { name: '파트너 관리', path: '/admin/partners', icon: '🤝' },
     { name: '전체 고객 관리', path: '/admin/customers', icon: '👤' },
-    { name: '파트너 매뉴얼', path: '/dashboard/manual', icon: '📖' },
     { name: '정산 관리', path: '/admin/settlement', icon: '💰' },
     { name: '설정', path: '/admin/settings/sms', icon: '⚙️' },
 ];
