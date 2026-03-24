@@ -108,11 +108,29 @@ export const sendStatusSms = internalAction({
       const result = await response.json();
       console.log("Aligo SMS Result:", result);
       
+      // Log the result
+      await ctx.runMutation(internal.sms.logSms, {
+        customerId: args.customerId,
+        type: "status",
+        receiver: (partner.phone || "").replace(/[^0-9]/g, ""),
+        message: message,
+        resultCode: String(result.result_code),
+        resultMessage: result.message || (result.result_code === "1" ? "Success" : "Unknown Error"),
+      });
+
       if (result.result_code !== "1") {
         console.error(`Aligo SMS Failed: ${result.message} (Code: ${result.result_code})`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Aligo API Network/Fetch Error:", error);
+      await ctx.runMutation(internal.sms.logSms, {
+        customerId: args.customerId,
+        type: "status_error",
+        receiver: (partner.phone || "").replace(/[^0-9]/g, ""),
+        message: message,
+        resultCode: "error_fetch",
+        resultMessage: error.message || "Network Error",
+      });
     }
   },
 });
@@ -142,11 +160,23 @@ export const sendAdminTestOnly = action({
       });
       
       const text = await response.text();
+      let result;
       try {
-        return JSON.parse(text);
+        result = JSON.parse(text);
       } catch (e) {
-        return { result_code: "-998", message: "JSON 파싱 에러", raw: text.slice(0, 100) };
+        result = { result_code: "-998", message: "JSON 파싱 에러", raw: text.slice(0, 100) };
       }
+
+      // Log the result
+      await ctx.runMutation(internal.sms.logSms, {
+        type: "admin_test",
+        receiver: receiver,
+        message: message,
+        resultCode: String(result.result_code),
+        resultMessage: result.message || (result.result_code === "1" ? "Success" : "Unknown Error"),
+      });
+
+      return result;
     } catch (err: any) {
       console.error("sendAdminTestOnly Error:", err);
       return { result_code: "-999", message: err.message, stack: err.stack };
@@ -364,6 +394,15 @@ export const testSms = action({
       const result = await response.json();
       console.log("Aligo Test SMS Raw Result:", result);
       
+      // Log the result
+      await ctx.runMutation(internal.sms.logSms, {
+        type: "test",
+        receiver: (args.receiver || "").replace(/[^0-9]/g, ""),
+        message: args.message,
+        resultCode: String(result.result_code),
+        resultMessage: result.message || (result.result_code === "1" ? "Success" : "Unknown Error"),
+      });
+
       // Always try to get IP info for diagnostic
       let serverIp = "Unknown";
       try {
