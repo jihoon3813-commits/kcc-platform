@@ -131,7 +131,25 @@ export const sendAdminPartnerNotifySms = internalAction({
     const templates: any = await ctx.runQuery(api.settings.getSetting, { key: "sms_templates" });
 
     if (!aligoConfig || !aligoConfig.apiKey || !aligoConfig.userId || !aligoConfig.senderNumber || !aligoConfig.adminPhone) {
-      console.log("Aligo API or Admin Phone not configured properly");
+      const missing = [];
+      if (!aligoConfig) missing.push("config");
+      else {
+        if (!aligoConfig.apiKey) missing.push("apiKey");
+        if (!aligoConfig.userId) missing.push("userId");
+        if (!aligoConfig.senderNumber) missing.push("senderNumber");
+        if (!aligoConfig.adminPhone) missing.push("adminPhone");
+      }
+      
+      console.log(`Aligo API or Admin Phone not configured properly: ${missing.join(", ")}`);
+      
+      // Log as failure
+      await ctx.runMutation(internal.sms.logSms, {
+        type: "admin_notify_error",
+        receiver: "ADMIN",
+        message: "Config missing: " + missing.join(", "),
+        resultCode: "error_config",
+        resultMessage: "관리자 번호 또는 API 설정 미흡",
+      });
       return;
     }
 

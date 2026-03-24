@@ -111,7 +111,9 @@ export const createPartner = mutation({
     });
 
     // Send notification to admin if it's a new request from website
+    console.log(`[PARTNER CREATE] Origin: ${origin}, ID: ${args.id}`);
     if (origin === 'request') {
+      console.log(`[PARTNER CREATE] Scheduling notification for ${args.id}`);
       await ctx.scheduler.runAfter(0, internal.sms.sendAdminPartnerNotifySms, {
         partnerId: args.id
       });
