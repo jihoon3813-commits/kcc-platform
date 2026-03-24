@@ -352,3 +352,12 @@ export const testSms = action({
     }
   },
 });
+
+export const testAdminNotify = action({
+  args: { 
+    partnerId: v.string() 
+  },
+  handler: async (ctx, args) => {
+    return await ctx.runAction(internal.sms.sendAdminPartnerNotifySms, { partnerId: args.partnerId });
+  },
+});

@@ -192,6 +192,43 @@ export default function SmsSettingsPage() {
                         >
                             테스트 문자 발송
                         </button>
+                        <button 
+                            onClick={async () => {
+                                const partnerId = prompt('알림 테스트를 위한 파트너 ID를 입력하세요', '01000000000');
+                                if (!partnerId) return;
+                                setIsSaving(true);
+                                try {
+                                    const res = await fetch('/api/proxy', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ action: 'testAdminNotify', partnerId })
+                                    });
+                                    const data = await res.json();
+                                    if (data) {
+                                        alert('관리자 알림 테스트 발송 처리가 완료되었습니다. 로그를 확인해 주세요.');
+                                    }
+                                } catch (err) {
+                                    alert('테스트 중 오류가 발생했습니다.');
+                                } finally {
+                                    setIsSaving(false);
+                                }
+                            }}
+                            disabled={isSaving}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                borderRadius: '0.75rem',
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                fontSize: '1rem',
+                                fontWeight: 700,
+                                border: 'none',
+                                cursor: isSaving ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s',
+                                opacity: isSaving ? 0.7 : 1
+                            }}
+                        >
+                            관리자 알림 테스트
+                        </button>
                         <div>
                             <button 
                                 onClick={handleSave}

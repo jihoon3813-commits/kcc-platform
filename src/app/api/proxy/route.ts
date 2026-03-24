@@ -262,6 +262,10 @@ export async function POST(request: Request) {
             const result = await convex!.action(api.sms.testSms, { receiver: body.receiver, message: body.message });
             return NextResponse.json(result);
         }
+        else if (action === "testAdminNotify") {
+            const result = await convex!.action(api.sms.testAdminNotify, { partnerId: body.partnerId });
+            return NextResponse.json(result);
+        }
         else if (action === "getSmsLogs") {
             const result = await convex!.query(api.sms.getLogs);
             return NextResponse.json({ result: "success", value: result });
