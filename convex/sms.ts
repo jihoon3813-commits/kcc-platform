@@ -117,6 +117,28 @@ export const sendStatusSms = internalAction({
   },
 });
 
+export const sendAdminTestOnly = action({
+  args: {},
+  handler: async (ctx, args): Promise<any> => {
+    const aligoConfig: any = await ctx.runQuery(api.settings.getSetting, { key: "aligo_config" });
+    if (!aligoConfig || !aligoConfig.adminPhone) return { result: "error", message: "관리자 번호 미설정" };
+    
+    const message = "[KCC구독] 관리자 배포 테스트 메시지입니다.\n가동 중임을 알려드립니다.";
+    const receiver = (aligoConfig.adminPhone || "").replace(/[^0-9]/g, "");
+    
+    const formData = new URLSearchParams();
+    formData.set("key", aligoConfig.apiKey);
+    formData.set("user_id", aligoConfig.userId);
+    formData.set("sender", (aligoConfig.senderNumber || "").replace(/[^0-9]/g, ""));
+    formData.set("receiver", receiver);
+    formData.set("msg", message);
+
+    const response = await fetch("https://apis.aligo.in/send/", { method: "POST", body: formData });
+    const result = await response.json();
+    return result;
+  }
+});
+
 export const sendAdminPartnerNotifySms = internalAction({
   args: { 
     partnerId: v.string(), 

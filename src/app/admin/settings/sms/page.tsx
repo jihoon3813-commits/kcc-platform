@@ -229,6 +229,43 @@ export default function SmsSettingsPage() {
                         >
                             관리자 알림 테스트
                         </button>
+                        <button 
+                            onClick={async () => {
+                                setIsSaving(true);
+                                try {
+                                    const res = await fetch('/api/proxy', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ action: 'testAdminDirect' })
+                                    });
+                                    const data = await res.json();
+                                    if (data.result_code === '1') {
+                                        alert('즉시 테스트 문자가 성공적으로 발송되었습니다.');
+                                    } else {
+                                        alert(`발송 실패: ${data.message} (코드: ${data.result_code || 'error'})`);
+                                    }
+                                } catch (err) {
+                                    alert('테스트 중 오류가 발생했습니다.');
+                                } finally {
+                                    setIsSaving(false);
+                                }
+                            }}
+                            disabled={isSaving}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                borderRadius: '0.75rem',
+                                backgroundColor: '#f59e0b',
+                                color: 'white',
+                                fontSize: '1rem',
+                                fontWeight: 700,
+                                border: 'none',
+                                cursor: isSaving ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s',
+                                opacity: isSaving ? 0.7 : 1
+                            }}
+                        >
+                            관리자 즉시 테스트
+                        </button>
                         <div>
                             <button 
                                 onClick={handleSave}
