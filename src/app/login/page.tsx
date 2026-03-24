@@ -65,6 +65,12 @@ export default function LoginPage() {
             if (data.result === 'success') {
                 // Save partner info to localStorage
                 localStorage.setItem('kcc_partner', JSON.stringify(data.partner));
+                
+                // Check if password change is required
+                if (password === '1111') {
+                    localStorage.setItem('kcc_require_password_change', 'true');
+                }
+                
                 router.push('/dashboard/list');
             } else {
                 setError(data.message || '로그인 정보가 올바르지 않습니다.');
@@ -109,7 +115,7 @@ export default function LoginPage() {
 
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>아이디</label>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>아이디(핸드폰번호)</label>
                         <input
                             type="text"
                             value={userId}
@@ -128,7 +134,7 @@ export default function LoginPage() {
                         />
                     </div>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>비밀번호</label>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>비밀번호(최초 1111)</label>
                         <input
                             type="password"
                             value={password}

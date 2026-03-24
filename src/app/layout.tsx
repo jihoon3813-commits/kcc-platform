@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     images: ["https://cdn.imweb.me/upload/S20250904697320f4fd9ed/9edabde9f8bd5.png"],
   },
   icons: {
-    icon: "/favicon.png",
+    icon: "https://cdn.imweb.me/upload/S20250904697320f4fd9ed/5b115594e9a66.png",
   },
 };
 
