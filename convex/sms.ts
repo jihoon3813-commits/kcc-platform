@@ -357,7 +357,7 @@ export const testAdminNotify = action({
   args: { 
     partnerId: v.string() 
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<any> => {
     return await ctx.runAction(internal.sms.sendAdminPartnerNotifySms, { partnerId: args.partnerId });
   },
 });
